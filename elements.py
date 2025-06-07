@@ -22,6 +22,7 @@ class ConcreteSection:
      height: float 
      Concrete: Concrete 
 
+
 @dataclass
 class Rebar: 
      diameter: float 
@@ -54,44 +55,183 @@ class ReinforcedConcreteBeamSection:
      BottomRebar: Rebar 
      Stirrup: Stirrup
      cover: float = 40
+     
+     def __post_init__(self): 
+          self.top_rebar_position_from_edge: float = self.cover + self.Stirrup.diameter + self.TopRebar.diameter/2
+          self.bottom_rebar_position_from_edge: float = self.cover + self.Stirrup.diameter + self.BottomRebar.diameter/2
 
      def get_positive_nominal_moment(self): 
-          # Cc + Cs + Ts = 0 
-          # 0.85*fc*a*b + As_top*fs_top + As_bottom * fs_bottom = 0
-          # Asume que el acero superior no fluye. Asume que el acero inferior fluye
-          # 0.85*fc*beta_1*c*b + As_top*Es*steel_train_top - As_bottom * fy = 0
-          
-          # Relacion de triangulos:
-          # steel_train_top = steel_train_top/(c-d') * (c-d') = steel_strain_bottom/(c-d) * (c-d')
-          #Sustituir
-          # 0.85*fc*beta_1*c*b + As_top*Es*steel_strain_bottom * (c-d') - As_bottom * fy = 0
-          # 0.85*fc*beta_1*c*b*(c-d) + As_top*Es*steel_strain_bottom * (c-d') - As_bottom * fy * (c-d) = 0
-          # 0.85*fc*beta_1*c**2*b - 0.85*fc*beta_1*c*b*d + As_top*Es*steel_strain_bottom * c - As_top*Es*steel_strain_bottom * d' - As_bottom * fy * c - As_bottom * fy * d = 0
-          # 0.85*fc*beta_1*c**2*b  + c*(-0.85*fc*beta_1*b*d + As_top*Es*steel_strain_bottom - As_bottom * fy) - (As_top*Es*steel_strain_bottom * d'  - As_bottom * fy * d) = 0
-          
           fc: float = self.ConcreteSection.Concrete.compression_resistance
           beta_1: float = self.ConcreteSection.Concrete.beta_1
           b: float = self.ConcreteSection.width 
-          d_bottom: float = self.ConcreteSection.height - self.cover
-          Es: float = self.BottomRebar.Steel.elastic_modulus
+          d_bottom: float = self.ConcreteSection.height - self.bottom_rebar_position_from_edge
           As_top: float = self.TopRebar.area
           As_bottom: float = self.BottomRebar.area
-          d_top: float = self.cover
-          steel_bottom_strain = -0.005
+          d_top: float = self.top_rebar_position_from_edge
           fy: float = self.BottomRebar.Steel.yield_stress
+          
 
-          A:float = 0.85*fc*beta_1*b
-          B:float =  -0.85*fc*beta_1*b*d_bottom + As_top*Es*steel_bottom_strain - As_bottom * fy
-          C:float = -As_top*Es*steel_bottom_strain * d_top  + As_bottom * fy * d_bottom
+          # Cc + Cs + Ts = 0 
+          # <- Compresion (-)      -> Tension (+)
+          # -0.85*fc*a*b + As_top*fs_top + As_bottom * fs_bottom = 0
+          # Asume que el acero superior no fluye. Asume que el acero inferior fluye
+          # -0.85*fc*beta_1*c*b + As_top*Es*steel_strain_top + As_bottom * fy = 0
+          
+          # Deformation Compatibility
+          # steel_strain_top = steel_strain_top/(d'-c) * (d'-c) = steel_strain_bottom/(d-c) * (d'-c)
 
-          print(A, B, C)                       
+          #Substitution
+          # -0.85*fc*beta_1*c*b + As_top*Es*steel_strain_bottom/(d-c) * (d'-c) + As_bottom * fy = 0
+          # -0.85*fc*beta_1*c*b*(d-c) + As_top*Es*steel_strain_bottom * (d'-c) + As_bottom * fy * (d-c)= 0
+          # -0.85*fc*beta_1*c*b*(d) + 0.85*fc*beta_1*c^2*b + As_top*Es*steel_strain_bottom * (d') - As_top*Es*steel_strain_bottom * (c) + As_bottom * fy * (d) - As_bottom * fy * (c)= 0
+          # 0.85*fc*beta_1*c^2*b - c*(0.85*fc*beta_1*b*d + As_top*Es*steel_strain_bottom + As_bottom * fy) + (As_top*Es*steel_strain_bottom * d'  + As_bottom * fy * d) = 0
+          # 0.85*fc*beta_1*b*c^2 - (0.85*fc*beta_1*b*d + As_top*Es*steel_strain_bottom + As_bottom * fy)*c + (As_top*Es*steel_strain_bottom * d'  + As_bottom * fy * d) = 0
+          # b*c^2 - (b*d + (As_top*Es*steel_strain_bottom + As_bottom * fy)/(0.85*fc*beta_1))*c + (As_top*Es*steel_strain_bottom * d'  + As_bottom * fy * d)/(0.85*fc*beta1) = 0
+          
+          # steel_strain_bottom = 0.0021, Es*0.0021 = fy
+          # b*c^2 - (b*d + (As_top*fy + As_bottom * fy)/(0.85*fc*beta_1))*c + (As_top*fy* d'  + As_bottom * fy * d)/(0.85*fc*beta1) = 0
+          # b*c^2 - (b*d + fy*(As_top + As_bottom)/(0.85*fc*beta_1))*c + fy*(As_top*d'  + As_bottom * d)/(0.85*fc*beta1) = 0
+
+          # The term fy/0.85*beta_1*fc can be thought as a ratio of stresses, Rf
+          # b*c^2 - (b*d + Rf*(As_top + As_bottom))*c + Rf*(As_top*d'  + As_bottom * d) = 0
+          
+          #Divide by b
+          # c^2 - (d + Rf/b*(As_top + As_bottom))*c + Rf/b*(As_top*d'  + As_bottom * d) = 0
+
+          # Solve the quadratic equation. Ac**2 + B*c + C = 0 
+          Rf:float = fy/(0.85*fc*beta_1)
+          A:float = 1
+          B:float =  - (d_bottom + Rf*(As_top + As_bottom)/b)
+          C:float = Rf*(As_top*d_top  + As_bottom* d_bottom)/b
+
           c: float = (-B - (B**2 - 4*A*C)**0.5) / (2*A)
           a: float = beta_1*c
-          print(c)
+
           nominal_moment: float = As_bottom*fy*(d_bottom - d_top) - 0.85*fc*beta_1*c*b*(a/2 - d_top)
 
           return nominal_moment
      
+     def get_negative_nominal_moment(self) -> float:
+          fc: float = self.ConcreteSection.Concrete.compression_resistance
+          beta_1: float = self.ConcreteSection.Concrete.beta_1
+          b: float = self.ConcreteSection.width 
+          d_bottom: float = self.bottom_rebar_position_from_edge
+          As_top: float = self.TopRebar.area
+          As_bottom: float = self.BottomRebar.area
+          d_top: float = self.ConcreteSection.height - self.top_rebar_position_from_edge
+          fy: float = self.BottomRebar.Steel.yield_stress
+
+          
+          Rf:float = fy/(0.85*fc*beta_1)
+          A:float = 1
+          B:float =  - (d_top + Rf*(As_top+ As_bottom)/b)
+          C:float = Rf*(As_top*d_top  + As_bottom* d_bottom)/b
+          
+          c: float = (-B - (B**2 - 4*A*C)**0.5)/(2)
+          a: float = beta_1*c
+          nominal_moment: float = As_top*fy*(d_bottom - d_top) - 0.85*fc*beta_1*c*b*(d_bottom - a/2)
+
+          return nominal_moment
+     
+     def get_minimum_shear_reinforcement(self) -> float: #Av_min/s
+          fc: float = self.ConcreteSection.Concrete.compression_resistance 
+          b: float = self.ConcreteSection.width
+          fyt: float = self.Stirrup.Steel.yield_stress
+
+          minimum_steel_reinforcement: float =max(0.062*math.sqrt(fc), 0.35)*b/fyt # mm^2 / mm
+
+          return minimum_steel_reinforcement
+
+     def get_nominal_concrete_shear_strength_for_positive_moment(self) -> float: 
+          Av_min: float = self.get_minimum_shear_reinforcement()
+          Av: float = self.Stirrup.area/self.Stirrup.spacing 
+          d_bottom: float = self.ConcreteSection.height - self.bottom_rebar_position_from_edge
+          fc: float = self.ConcreteSection.Concrete.compression_resistance
+          b: float = self.ConcreteSection.width
+          As_bottom = self.BottomRebar.area 
+          
+          # Lambda_ calculation 
+          lambda_ = 1.00 #NOT LIGHTWEIGHT CONCRETE 
+          lambda_s = min(1, math.sqrt(2/(1+0.004*d_bottom)))
+
+          # Comparison
+          if Av >= Av_min: 
+               nominal_concrete_shear_strength: float = 0.17*lambda_*math.sqrt(fc)*b*d_bottom
+          else: 
+               nominal_concrete_shear_strength: float = 0.66*lambda_s*lambda_*(As_bottom/(b*d_bottom))**(1/3) * math.sqrt(fc)*b*d_bottom
+
+          return nominal_concrete_shear_strength
+     
+     def get_nominal_concrete_shear_strength_for_negative_moment(self) -> float: 
+          Av_min: float = self.get_minimum_shear_reinforcement()
+          Av: float = self.Stirrup.area/self.Stirrup.spacing 
+          d_top: float = self.ConcreteSection.height - self.top_rebar_position_from_edge
+          fc: float = self.ConcreteSection.Concrete.compression_resistance
+          b: float = self.ConcreteSection.width
+          As_top: float = self.TopRebar.area 
+
+          # Lambda_ calculation 
+          lambda_ = 1.00 #NOT LIGHTWEIGHT CONCRETE 
+          lambda_s = min(1, math.sqrt(2/(1+0.004*d_top)))
+
+          # Comparison
+          if Av >= Av_min: 
+               nominal_concrete_shear_strength: float = 0.17*lambda_*math.sqrt(fc)*b*d_top
+     
+          else: 
+               nominal_concrete_shear_strength: float = 0.66*lambda_s*lambda_*(As_top/(b*d_top))**(1/3) * math.sqrt(fc)*b*d_top
+
+          return nominal_concrete_shear_strength
+
+     def get_nominal_stirrups_shear_strength_for_positive_moment(self) -> float: 
+          Av: float = self.Stirrup.area
+          d_bottom: float = self.ConcreteSection.height - self.bottom_rebar_position_from_edge
+          fyt: float = self.Stirrup.Steel.yield_stress 
+          s: float = self.Stirrup.spacing
+
+          return Av*fyt*d_bottom/s
+     
+     def get_nominal_stirrups_shear_strength_for_negative_moment(self) -> float: 
+          Av: float = self.Stirrup.area
+          d_top: float = self.ConcreteSection.height - self.top_rebar_position_from_edge
+          fyt: float = self.Stirrup.Steel.yield_stress 
+          s: float = self.Stirrup.spacing
+
+          return Av*fyt*d_top/s
+     
+     def get_ultimate_shear_limit_for_positive_moment(self) -> float: 
+          phi:float = 0.60 #Shear
+
+          fc: float = self.ConcreteSection.Concrete.compression_resistance 
+          b: float = self.ConcreteSection.width 
+          d_bottom: float = self.ConcreteSection.height - self.bottom_rebar_position_from_edge
+
+          Vc: float = self.get_nominal_concrete_shear_strength_for_positive_moment()
+
+          return phi*(Vc + 0.66*math.sqrt(fc)*b*d_bottom)
+
+     def get_ultimate_shear_limit_for_negative_moment(self) -> float: 
+          phi:float = 0.60 #Shear
+
+          fc: float = self.ConcreteSection.Concrete.compression_resistance 
+          b: float = self.ConcreteSection.width 
+          d_top: float = self.ConcreteSection.height - self.top_rebar_position_from_edge
+
+          Vc: float = self.get_nominal_concrete_shear_strength_for_negative_moment()
+
+          return phi*(Vc + 0.66*math.sqrt(fc)*b*d_top)
+     
+     def get_nominal_shear_strength_for_positive_moment(self): 
+          Vc: float = self.get_nominal_concrete_shear_strength_for_positive_moment()
+          Vs: float = self.get_nominal_stirrups_shear_strength_for_positive_moment() 
+
+          return Vc + Vs
+
+     def get_nominal_shear_strength_for_negative_moment(self): 
+          Vc: float = self.get_nominal_concrete_shear_strength_for_negative_moment()
+          Vs: float = self.get_nominal_stirrups_shear_strength_for_negative_moment() 
+          
+          return Vc + Vs
 # @dataclass 
 # class Beam: 
 #      width: float
