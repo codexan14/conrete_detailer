@@ -50,8 +50,8 @@ def main():
           bottom_rebar_quantity: int=st.number_input("Number of Bottom bars", min_value=1, step=1) 
 
      BottomRebar = elements.Rebar(
-          diameter=top_rebar_diameter, 
-          quantity=top_rebar_quantity,
+          diameter=bottom_rebar_diameter, 
+          quantity=bottom_rebar_quantity,
           Steel=Steel_material
      )
 
