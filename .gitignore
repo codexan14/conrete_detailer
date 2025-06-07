@@ -1,0 +1,31 @@
+# Bytecode files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+.env/
+
+# Build folders
+build/
+dist/
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# IDE files
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+
+# Streamlit cache (optional)
+.streamlit/
+
+# Python egg files
+*.egg-info/
