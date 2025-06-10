@@ -1,4 +1,4 @@
-import core.elements as elements
+import core.reinforced_concrete as reinforced_concrete
 import core.materials as materials
 
 Concrete_28 = materials.Concrete(
@@ -9,32 +9,32 @@ Steel_420 = materials.Steel(
      yield_stress=420
 )
 
-CS_30X60 = elements.ConcreteSection(
+CS_30X60 = reinforced_concrete.ConcreteSection(
      width=300, 
      height=600, 
      Concrete=Concrete_28
 )
 
-SR_1014 = elements.Rebar(
+SR_1014 = reinforced_concrete.Rebar(
      diameter=25, 
      quantity=2,
      Steel=Steel_420
 )
 
-SR_2028 = elements.Rebar(
+SR_2028 = reinforced_concrete.Rebar(
      diameter=25, 
      quantity=4,
      Steel=Steel_420
 )
 
-SS_142_100 = elements.Stirrup(
+SS_142_100 = reinforced_concrete.Stirrup(
      diameter=9.5, 
      quantity=2,
      spacing=50,
      Steel=Steel_420
 )
 
-RCB_30X60_1014_1014 = elements.ReinforcedConcreteBeamSection(
+RCB_30X60_1014_1014 = reinforced_concrete.ReinforcedConcreteBeamSection(
           ConcreteSection = CS_30X60, 
           TopRebar= SR_1014, 
           BottomRebar= SR_1014,

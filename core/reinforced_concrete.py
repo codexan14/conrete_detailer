@@ -254,7 +254,7 @@ class ReinforcedConcreteColumnSection:
                - self.left_rebar_position_from_edge
                - self.right_rebar_position_from_edge) / (self.HorizontalRebar.quantity/2 + 1)
            
-          ---------------++-+/self.horizontal_bar_free_spacing:float = (
+          self.horizontal_bar_free_spacing:float = (
                self.horizontal_bar_spacing_from_center - self.HorizontalRebar.diameter)
           
 
