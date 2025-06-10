@@ -3,11 +3,10 @@ import numpy as np
 import math as math
 
 from dataclasses import dataclass
-from materials import Concrete, Steel
+from core.materials import Concrete, Steel
 from ezdxf.document import Drawing
 from ezdxf.layouts.layout import Modelspace
 
-import units 
 import ezdxf
 
 MODEL_UNITS: dict[str, str]={
@@ -232,6 +231,47 @@ class ReinforcedConcreteBeamSection:
           Vs: float = self.get_nominal_stirrups_shear_strength_for_negative_moment() 
           
           return Vc + Vs
+     
+
+@dataclass 
+class ReinforcedConcreteColumnSection: 
+     ConcreteSection: ConcreteSection 
+     CornerRebar: Rebar 
+     HorizontalRebar: Rebar 
+     VerticalRebar: Rebar
+     Stirrup: Stirrup
+     cover: float = 40
+
+
+
+     def __post_init__(self): 
+          self.top_rebar_position_from_edge: float = self.cover + self.Stirrup.diameter + self.HorizontalRebar.diameter/2
+          self.bottom_rebar_position_from_edge: float = self.cover + self.Stirrup.diameter + self.HorizontalRebar.diameter/2
+          self.left_rebar_position_from_edge: float = self.cover + self.Stirrup.diameter + self.VerticalRebar.diameter/2
+          self.right_rebar_position_from_edge: float = self.cover + self.Stirrup.diameter + self.VerticalRebar.diameter/2
+
+          self.horizontal_bar_spacing_from_center:float = (self.ConcreteSection.width 
+               - self.left_rebar_position_from_edge
+               - self.right_rebar_position_from_edge) / (self.HorizontalRebar.quantity/2 + 1)
+           
+          ---------------++-+/self.horizontal_bar_free_spacing:float = (
+               self.horizontal_bar_spacing_from_center - self.HorizontalRebar.diameter)
+          
+
+          self.horizontal_rebar_coordinates: list[float] = [0.]
+
+
+     def interaction_diagram(self, N:int = 10): 
+          d: float = self.ConcreteSection.height - self.bottom_rebar_position_from_edge
+          top_strain: float = -0.003
+          print(self.horizontal_rebar_coordinates)
+          # for i in range(N): 
+          #      bottom_strain: float = -0.003 + (0.0021 + 0.003)/(9)*N
+
+          #      c: float = top_strain * d / (top_strain - bottom_strain)
+          #      a=self.ConcreteSection.Concrete.beta_1 * c 
+
+
 # @dataclass 
 # class Beam: 
 #      width: float

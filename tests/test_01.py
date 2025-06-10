@@ -1,5 +1,5 @@
-import elements
-import materials
+import core.elements as elements
+import core.materials as materials
 
 Concrete_28 = materials.Concrete(
      compression_resistance=28

@@ -1,6 +1,6 @@
 import streamlit as st 
 import elements
-import materials
+import core.materials as materials
 
 def main():
      st.title("BEAM APP")
