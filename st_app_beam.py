@@ -50,8 +50,13 @@ def main():
           bottom_rebar_quantity: int=st.number_input("Number of Bottom bars", min_value=1, step=1) 
 
      BottomRebar = elements.Rebar(
+<<<<<<< HEAD
           diameter=bottom_rebar_diameter, 
           quantity=bottom_rebar_quantity,
+=======
+          diameter=top_rebar_diameter, 
+          quantity=top_rebar_quantity,
+>>>>>>> 6d872a8 (feat: Added the GUI with streamlit and the Beam class can now calculate nominal strengths)
           Steel=Steel_material
      )
 
