@@ -51,12 +51,17 @@ def main():
 
      BottomRebar = elements.Rebar(
 <<<<<<< HEAD
+<<<<<<< HEAD
           diameter=bottom_rebar_diameter, 
           quantity=bottom_rebar_quantity,
 =======
           diameter=top_rebar_diameter, 
           quantity=top_rebar_quantity,
 >>>>>>> 6d872a8 (feat: Added the GUI with streamlit and the Beam class can now calculate nominal strengths)
+=======
+          diameter=bottom_rebar_diameter, 
+          quantity=bottom_rebar_quantity,
+>>>>>>> 7c22ff0 (Modified the license)
           Steel=Steel_material
      )
 

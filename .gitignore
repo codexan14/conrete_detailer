@@ -29,7 +29,11 @@ dist/
 
 # Python egg files
 <<<<<<< HEAD
+<<<<<<< HEAD
 *.egg-info/
 =======
 *.egg-info/
 >>>>>>> 353a3a4 (deleted some old files)
+=======
+*.egg-info/
+>>>>>>> 7c22ff0 (Modified the license)

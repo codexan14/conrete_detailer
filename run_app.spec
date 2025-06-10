@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 from PyInstaller.utils.hooks import collect_all
 
@@ -9,11 +10,14 @@ hiddenimports = []
 tmp_ret = collect_all('streamlit')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 >>>>>>> 6d872a8 (feat: Added the GUI with streamlit and the Beam class can now calculate nominal strengths)
+=======
+>>>>>>> 7c22ff0 (Modified the license)
 
 
 a = Analysis(
     ['run_app.py'],
     pathex=[],
+<<<<<<< HEAD
 <<<<<<< HEAD
     binaries=[],
     datas=[],
@@ -23,6 +27,11 @@ a = Analysis(
     datas=datas,
     hiddenimports=hiddenimports,
 >>>>>>> 6d872a8 (feat: Added the GUI with streamlit and the Beam class can now calculate nominal strengths)
+=======
+    binaries=[],
+    datas=[],
+    hiddenimports=[],
+>>>>>>> 7c22ff0 (Modified the license)
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
