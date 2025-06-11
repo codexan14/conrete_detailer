@@ -1,50 +1,57 @@
-import core.reinforced_concrete as reinforced_concrete
+import core.composed_sections as composed_sections
+import core.sections as sections
 import core.materials as materials
 
-Concrete_28 = materials.Concrete(
-     compression_resistance=28
-)
-
-Steel_420 = materials.Steel(
-     yield_stress=420
-)
-
-CS_30X60 = reinforced_concrete.ConcreteSection(
-     width=300, 
-     height=600, 
-     Concrete=Concrete_28
-)
-
-SR_1014 = reinforced_concrete.Rebar(
-     diameter=25, 
-     quantity=2,
-     Steel=Steel_420
-)
-
-SR_2028 = reinforced_concrete.Rebar(
-     diameter=25, 
-     quantity=4,
-     Steel=Steel_420
-)
-
-SS_142_100 = reinforced_concrete.Stirrup(
-     diameter=9.5, 
-     quantity=2,
-     spacing=50,
-     Steel=Steel_420
-)
-
-RCB_30X60_1014_1014 = reinforced_concrete.ReinforcedConcreteBeamSection(
-          ConcreteSection = CS_30X60, 
-          TopRebar= SR_1014, 
-          BottomRebar= SR_1014,
-          Stirrup=SS_142_100
+if __name__ == "__main__": 
+     Concrete_28 = materials.Concrete(
+          compression_strength=28
      )
 
-print(0.9*RCB_30X60_1014_1014.get_positive_nominal_moment(), "N-mm", "M+")
-print(0.9*RCB_30X60_1014_1014.get_negative_nominal_moment(), "N-mm", "M-")
-print(RCB_30X60_1014_1014.get_nominal_shear_strength_for_positive_moment(), "V")
-print(RCB_30X60_1014_1014.get_nominal_shear_strength_for_negative_moment(), "V-")
-print(RCB_30X60_1014_1014.get_ultimate_shear_limit_for_positive_moment(), "Vu+")
+     Steel_420 = materials.Steel(
+          tension_strength=420
+     )
 
-# print(RCB_30X60_1014_1014.__repr__())
+     S_30X60 = sections.RectangularSection(
+          width=300, 
+          height=600
+     )
+
+     CS_30X60 = composed_sections.ConcreteSection(
+          Section=S_30X60,
+          Concrete=Concrete_28
+     )
+
+     
+     SRT_1014 = composed_sections.FlexuralSteel(
+          position='top',
+          diameter=25,
+          quantity=2
+     )
+
+     SRB_1014 = composed_sections.FlexuralSteel(
+          position='bottom',
+          diameter=25,
+          quantity=2
+     )
+
+     SS_142_100 =composed_sections.Stirrups(
+          position='stirrups', 
+          diameter=25, 
+          quantity=2,
+          stirrup_type='closed'
+     )
+     
+
+     RCB_30X60_1014_1014 = composed_sections.ReinforcedConcreteBeamSection(
+          ConcreteSection=CS_30X60,
+          flexural_steel_list=[SRT_1014, SRB_1014], 
+          stirrups_list=[SS_142_100]
+     )
+
+     print(0.9*RCB_30X60_1014_1014.get_positive_nominal_moment(), "N-mm", "M+")
+     # print(0.9*RCB_30X60_1014_1014.get_negative_nominal_moment(), "N-mm", "M-")
+     # print(RCB_30X60_1014_1014.get_nominal_shear_strength_for_positive_moment(), "V")
+     # print(RCB_30X60_1014_1014.get_nominal_shear_strength_for_negative_moment(), "V-")
+     # print(RCB_30X60_1014_1014.get_ultimate_shear_limit_for_positive_moment(), "Vu+")
+
+     # print(RCB_30X60_1014_1014.__repr__())
