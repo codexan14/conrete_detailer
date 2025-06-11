@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 import numpy as np 
 from numpy.typing import NDArray
-from ..core.reinforced_concrete import ReinforcedConcreteSection, ReinforcedConcreteBeamSection
 
 element_counter = 0
 
@@ -33,6 +32,7 @@ class Element:
 class Beam(Element): 
      def local_stiffness_matrix(self) -> NDArray[np.float64]:
           AE = self.Section.gross_area * self.Section.ConcreteSection.Concrete.elastic_modulus 
+          EI=self.Section.ConcreteSection.Concrete.elastic_modulus * self.Section.ge 
           return np.array([
                [AE/L,    0,             0,             -AE/L,    0,             0],
                [0,       12*EI/L**3,    6*EI/L**2,     0,        -12*EI/L**3,   6*EI/L**2],

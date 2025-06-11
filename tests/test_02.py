@@ -1,6 +1,6 @@
 from typing import Literal
 from core.materials import Concrete, Steel
-from core.reinforced_concrete import ConcreteSection, Rebar, Stirrup, ReinforcedConcreteColumnSection
+from core.sections import ConcreteSection, Rebar, Stirrup, ReinforcedConcreteColumnSection
 
 
 
