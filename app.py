@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
 )
 import sys
 import core.materials as materials
-import core.elements as
+import core.elements
 
 class BeamApp(QWidget):
     def __init__(self):
