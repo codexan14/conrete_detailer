@@ -1,6 +1,6 @@
 from typing import Literal
 from core.materials import Concrete, Steel
-from core.sections import ConcreteSection, Rebar, Stirrup, ReinforcedConcreteColumnSection
+from core.composed_sections import ConcreteSection, ReinforcedConcreteSection, ReinforcedConcreteBeamSection
 
 
 
@@ -8,11 +8,11 @@ if __name__ == "__main__":
      print("DEBUG: Imports successful!") # <-- Add this after imports
 
      Concrete_28 = Concrete(
-          compression_resistance=28
+          compression_strength=28
      )
 
      Steel_420 = Steel(
-          yield_stress=420
+          tension_strength=420
      )
 
      CS_30X60 = ConcreteSection(

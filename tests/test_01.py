@@ -1,6 +1,7 @@
-import core.composed_sections as composed_sections
+import core.sections as sections
 import core.sections as sections
 import core.materials as materials
+import core.analysis as analysis
 
 if __name__ == "__main__": 
      Concrete_28 = materials.Concrete(
@@ -11,45 +12,21 @@ if __name__ == "__main__":
           tension_strength=420
      )
 
-     S_30X60 = sections.RectangularSection(
+
+     RCB_30X60 = sections.RCRectangularBeamSection(
+          Concrete=Concrete_28, 
+          Steel=Steel_420, 
           width=300, 
-          height=600
+          height=600,
+          flexural_top_steel_area=1521,
+          flexural_bottom_steel_area=1014,
+          shear_steel_area=142,
+          shear_steel_separation=50
      )
 
-     CS_30X60 = composed_sections.ConcreteSection(
-          Section=S_30X60,
-          Concrete=Concrete_28
-     )
 
-     
-     SRT_1014 = composed_sections.FlexuralSteel(
-          position='top',
-          diameter=25,
-          quantity=2
-     )
-
-     SRB_1014 = composed_sections.FlexuralSteel(
-          position='bottom',
-          diameter=25,
-          quantity=2
-     )
-
-     SS_142_100 =composed_sections.Stirrups(
-          position='stirrups', 
-          diameter=25, 
-          quantity=2,
-          stirrup_type='closed'
-     )
-     
-
-     RCB_30X60_1014_1014 = composed_sections.ReinforcedConcreteBeamSection(
-          ConcreteSection=CS_30X60,
-          flexural_steel_list=[SRT_1014, SRB_1014], 
-          stirrups_list=[SS_142_100]
-     )
-
-     print(0.9*RCB_30X60_1014_1014.get_positive_nominal_moment(), "N-mm", "M+")
-     # print(0.9*RCB_30X60_1014_1014.get_negative_nominal_moment(), "N-mm", "M-")
+     print(0.9*RCB_30X60.get_nominal_moment(axis=2, sign='positive'), "N-mm", "M+")
+     print(0.9*RCB_30X60.get_nominal_moment(axis=2, sign='negative'), "N-mm", "M+")
      # print(RCB_30X60_1014_1014.get_nominal_shear_strength_for_positive_moment(), "V")
      # print(RCB_30X60_1014_1014.get_nominal_shear_strength_for_negative_moment(), "V-")
      # print(RCB_30X60_1014_1014.get_ultimate_shear_limit_for_positive_moment(), "Vu+")
