@@ -106,7 +106,7 @@ class ReinforcedConcreteSection:
           for flexural_steel in self.flexural_steel_list: 
                flexural_steel.define_geometry(ContainingSection=self.ConcreteSection, offset=self.cover + main_stirrup_diameter)
           
-     def get_flexural_coord_from_edge(self, side: Literal['top', 'bottom', 'left', 'right']): 
+     def get_flexural_coord_from_edge(self, side: Literal['top', 'bottom', 'left', 'right']) -> float: 
           first_moment_axis_1: float = 0
           first_moment_axis_2: float = 0
           total_area: float = 0
@@ -117,12 +117,16 @@ class ReinforcedConcreteSection:
                          first_moment_axis_1 += Rebar.area/Rebar.quantity * coords[0]
                          first_moment_axis_2 += Rebar.area/Rebar.quantity * coords[1]
                          total_area += Rebar.area/Rebar.quantity
-                    
-                    if Rebar.position == "corner": 
+          
+          if side == 'top' or side == 'bottom':
+               distance_from_edge: float = first_moment_axis_1/total_area
+          elif side == 'left' or side == 'right': 
+               distance_from_edge: float = first_moment_axis_2/total_area
+
+          
+          return distance_from_edge
+
                          
-               
-
-
 
 
 @dataclass
@@ -144,7 +148,7 @@ class ReinforcedConcreteBeamSection(ReinforcedConcreteSection):
           fc: float = self.ConcreteSection.Concrete.compression_strength
           beta_1: float = self.ConcreteSection.Concrete.beta_1
           b: float = self.ConcreteSection.Section.width 
-          d_bottom: float = self.ConcreteSection.Section.height - self.bottom_rebar_position_from_edge
+          d_bottom: float = self.ConcreteSection.Section.height - self.get_flexural_coord_from_edge('bottom')
           As_top: float = self.TopRebar.area
           As_bottom: float = self.BottomRebar.area
           d_top: float = self.top_rebar_position_from_edge
