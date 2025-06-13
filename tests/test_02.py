@@ -1,59 +1,36 @@
-from typing import Literal
-from core.materials import Concrete, Steel
-from core.composed_sections import ConcreteSection, ReinforcedConcreteSection, ReinforcedConcreteBeamSection
-
-
-
-if __name__ == "__main__":
-     print("DEBUG: Imports successful!") # <-- Add this after imports
-
-     Concrete_28 = Concrete(
-          compression_strength=28
+# BEAM IN FEM, ANALYSIS
+import core.fem as fem 
+import core.geometry as geometry
+import core.structural_sections as structural_section
+import core.materials as materials
+import pandas as pd 
+if __name__ == '__main__':
+     Concrete24 = materials.Concrete(
+          compression_strength = 28
      )
 
-     Steel_420 = Steel(
+     Steel420 = materials.Steel(
           tension_strength=420
      )
 
-     CS_30X60 = ConcreteSection(
+     S300X600 = geometry.RectangularSection(
           width=300, 
-          height=600, 
-          Concrete=Concrete_28
+          height=600
      )
 
-     CornerBars = Rebar(
-          diameter=25, 
-          quantity=4,
-          Steel=Steel_420
+     RCB300X600 = structural_section.RCRectangularBeamSection(
+          Concrete=Concrete24, 
+          Steel=Steel420,
+          Section = S300X600
      )
 
-     HorizontalRebar = Rebar(
-          diameter=25, 
-          quantity=4,
-          Steel=Steel_420
+     FEMBEam = fem.B2D2(
+          nodes = [
+               (0, 0), 
+               (10, 0)
+          ], 
+          ReinforcedSection=RCB300X600
      )
+     
 
-     VerticalRebar = Rebar(
-          diameter=25, 
-          quantity=4,
-          Steel=Steel_420
-     )
-
-     SS_142_100 = Stirrup(
-          diameter=9.5, 
-          quantity=2,
-          spacing=50,
-          Steel=Steel_420
-     )
-
-
-     C1 = ReinforcedConcreteColumnSection(
-          ConcreteSection=CS_30X60, 
-          CornerRebar=CornerBars, 
-          HorizontalRebar=HorizontalRebar, 
-          VerticalRebar=VerticalRebar,
-          Stirrup=SS_142_100
-     )
-
-
-     print(C1.horizontal_spacing)
+     print(pd.DataFrame(FEMBEam.stiffness_matrix))

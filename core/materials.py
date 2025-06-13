@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
 import math 
+from abc import ABC, abstractmethod
+
 @dataclass
-class LinearElastic: 
+class LinearElastic(ABC):
      elastic_modulus: float = field(init = False)
      compression_strength: float = field(init=False)
      tension_strength: float = field(init = False) 

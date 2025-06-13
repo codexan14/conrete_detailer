@@ -1,7 +1,6 @@
-import core.sections as sections
-import core.sections as sections
 import core.materials as materials
-import core.analysis as analysis
+import core.structural_sections as structural_sections
+import core.geometry as geometry
 
 if __name__ == "__main__": 
      Concrete_28 = materials.Concrete(
@@ -12,12 +11,14 @@ if __name__ == "__main__":
           tension_strength=420
      )
 
-
-     RCB_30X60 = sections.RCRectangularBeamSection(
+     Section = geometry.RectangularSection(
+          width=300, 
+          height=600
+     )
+     RCB_30X60 = structural_sections.RCRectangularBeamSection(
           Concrete=Concrete_28, 
           Steel=Steel_420, 
-          width=300, 
-          height=600,
+          Section=Section,
           flexural_top_steel_area=1521,
           flexural_bottom_steel_area=1014,
           shear_steel_area=142,
