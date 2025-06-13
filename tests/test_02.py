@@ -1,9 +1,10 @@
 # BEAM IN FEM, ANALYSIS
-import core.fem as fem 
+import core.fem.elements as elements 
 import core.geometry as geometry
 import core.structural_sections as structural_section
 import core.materials as materials
 import pandas as pd 
+
 if __name__ == '__main__':
      Concrete24 = materials.Concrete(
           compression_strength = 28
@@ -24,7 +25,7 @@ if __name__ == '__main__':
           Section = S300X600
      )
 
-     FEMBEam = fem.B2D2(
+     FEMBEam = elements.B2D2(
           nodes = [
                (0, 0), 
                (10, 0)

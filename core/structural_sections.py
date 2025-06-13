@@ -35,10 +35,10 @@ class RCRectangularBeamSection(StructuralSection):
 
      @property 
      def elastic_modulus(self)->float: 
-          Ec = self.Concrete.elastic_modulus
-          Es = self.Steel.elastic_modulus 
-          As = self.flexural_top_steel_area + self.flexural_bottom_steel_area 
-          Ac = self.Section.area - As 
+          Ec: float = self.Concrete.elastic_modulus
+          Es: float = self.Steel.elastic_modulus 
+          As: float = self.flexural_top_steel_area + self.flexural_bottom_steel_area 
+          Ac: float = self.Section.area - As 
 
           return (Ec*Ac + Es*As)/(Ac + As)
 
