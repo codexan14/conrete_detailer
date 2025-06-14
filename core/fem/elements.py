@@ -22,7 +22,7 @@ class Node:
 
 @dataclass
 class FEMElement(ABC):
-    index: int
+    index: int = field(init=False)
     nodes: tuple[Node, ...]
 
     def __post_init__(self)-> None: 
@@ -59,7 +59,7 @@ class B2D2(FEMElement):
     
     @property
     def length(self)-> float: 
-          ux: float = self.nodes[1][0] - self.nodes[0][0]
-          uy: float = self.nodes[1][1] - self.nodes[0][1]
+          ux: float = self.nodes[1].coordinates[0] - self.nodes[0].coordinates[0]
+          uy: float = self.nodes[1].coordinates[1] - self.nodes[0].coordinates[1]
 
           return math.sqrt(ux**2 + uy**2)

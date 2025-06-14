@@ -3,6 +3,7 @@ import core.fem.elements as elements
 import core.geometry as geometry
 import core.structural_sections as structural_section
 import core.materials as materials
+import core.fem.elements as elements
 import pandas as pd 
 
 if __name__ == '__main__':
@@ -25,11 +26,15 @@ if __name__ == '__main__':
           Section = S300X600
      )
 
+     P1 = elements.Node(
+          coordinates=(0, 0, 0)
+     )
+
+     P2 = elements.Node(
+          coordinates=(10000, 0, 0)
+     )
      FEMBEam = elements.B2D2(
-          nodes = [
-               (0, 0), 
-               (10, 0)
-          ], 
+          nodes = (P1, P2), 
           ReinforcedSection=RCB300X600
      )
      

@@ -3,7 +3,11 @@ import core.fem.elements as elements
 import core.structural_sections as structural_sections
 import core.materials as materials 
 import core.geometry as geometry
+import core.fem.elements as elements
 import pandas as pd 
+import core.fem.forces as forces
+import core.fem.restrains as restrain 
+import core.fem.model as model
 
 if __name__ == "__main__": 
      print("Hello. This module should run")
@@ -21,16 +25,38 @@ if __name__ == "__main__":
           Section=S120X250
      )
 
+     P01 = elements.Node(
+          coordinates=(0, 0, 0)
+     )
+
+     P02 = elements.Node(
+          coordinates=(2000, 0, 0)
+     )
      Cantilever= elements.B2D2(
-          nodes=[
-               (0, 0), 
-               (2000, 0)
-          ],
+          nodes=(P01, P02),
           ReinforcedSection=RCB120X250
      )
 
-     Forces
+     Force = forces.PunctualForceOnBeams(
+          load_case="DEAD",
+          magnitud=-2000, 
+          axis=(3, 'local'),
+          position=1,
+          elements=[Cantilever]
+     )
 
-     Restrains
+     Restrain = restrain.FixedSupport(
+          node=P01
+     )
+     
+
+     M = model.LinearElastic(
+          active_axis=(True, True, False),
+          elements=[Cantilever],
+          restrains=[Restrain],
+          loads=[Force]
+     )
+
+     print(pd.Series(M.solve()[1]))
      print(pd.DataFrame(Cantilever.stiffness_matrix))
      print(materials.Concrete(28).elastic_modulus)
