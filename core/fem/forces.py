@@ -11,7 +11,7 @@ class Load(ABC):
 
     @property
     @abstractmethod 
-    def equivalent_FEM_force(self) -> dict[B2D2, list[NDArray[np.float64]]]:
+    def equivalent_FEM_force(self) -> dict[Node, list[NDArray[np.float64]]]:
         # for each element provided (first list), it returns a list (second list) of 
         # vecotr forces [NDArray] for each node of the element
         # list of elements
@@ -32,12 +32,50 @@ class PunctualForceOnBeams(Load):
     elements: list[B2D2]
 
     @property
-    def equivalent_FEM_force(self) -> dict[B2D2, list[NDArray[np.float64]]]:
-        dict_of_forces: dict[B2D2, list[NDArray[np.float64]]] = {}
-        for element in self.elements:
-            dict_of_forces[element] = [
-                np.array([1,2,3,4,5,6]),
-                np.array([7,8,9,10,11,12])
-            ]
+    def equivalent_FEM_force(self) -> dict[Node, list[NDArray[np.float64]]]:
+        dict_of_forces: dict[Node, list[NDArray[np.float64]]] = {}
+        P = self.magnitud 
+        ar = self.position
+        br = (1-self.position)
+
+        if self.axis == (1, 'global'): 
+            F1 = np.array([
+                        P/2,0,0,0,0,0,P/2,0,0,0,0,0]
+                        , dtype=np.float64)
+            
+            F2 = np.array([
+                        P/2,0,0,0,0,0,P/2,0,0,0,0,0]
+                        , dtype=np.float64)
+            
+            for element in self.elements:
+                if element.nodes[0] in dict_of_forces.keys(): 
+                    dict_of_forces[element.nodes[0]] += F1
+                else: 
+                    dict_of_forces[element.nodes[0]] = F1
+                
+                if element.nodes[1] in dict_of_forces.keys(): 
+                    dict_of_forces[element.nodes[1]] += F2
+                else: 
+                    dict_of_forces[element.nodes[1]] = F2
         
+        if self.axis == (2, 'global'): 
+            F1 = np.array([
+                        0,P/2,0,0,0,0,0,P/2,0,0,0,0]
+                        , dtype=np.float64)
+            
+            F2 = np.array([
+                        P/2,0,0,0,0,0,P/2,0,0,0,0,0]
+                        , dtype=np.float64)
+            
+            for element in self.elements:
+                if element.nodes[0] in dict_of_forces.keys(): 
+                    dict_of_forces[element.nodes[0]] += F1
+                else: 
+                    dict_of_forces[element.nodes[0]] = F1
+                
+                if element.nodes[1] in dict_of_forces.keys(): 
+                    dict_of_forces[element.nodes[1]] += F2
+                else: 
+                    dict_of_forces[element.nodes[1]] = F2
+
         return dict_of_forces

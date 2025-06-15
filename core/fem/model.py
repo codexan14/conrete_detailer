@@ -59,7 +59,20 @@ class LinearElastic(Model):
     
     def assembly(self) -> NDArray[np.float64]: 
         pass 
-        
+    
+    def assemble_forces(self, dofs: NDArray[np.int64]) -> NDArray[np.float64]: 
+        F = np.zeros(dofs)
+
+        for forces in self.loads: 
+            F
+        F = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+                     
+        return F[dofs]
+    
+    def assemble_displacements(self, dofs: NDArray[np.int64]) -> NDArray[np.float64]: 
+        U = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+                     
+        return U[dofs]
     
     def solve(self) -> NDArray[np.float64]: 
         active_dof_indeces: set[int] = set()
@@ -107,18 +120,20 @@ class LinearElastic(Model):
         Kuk = self.alt_sub_stiffness_matrix(unknown_forces_indeces,known_displacement_indeces)
         Kuu = self.alt_sub_stiffness_matrix(unknown_forces_indeces,unknown_displacement_indeces)
 
-        print("Kku")
-        print(pd.DataFrame(Kku))
-        Kku = self.sub_stiffness_matrix([3,4,5],[3,4,5])
-        print(pd.DataFrame(Kku))
-        print("theother")
+        # print("Kku")
+        # print(pd.DataFrame(Kku))
+        # Kku = self.sub_stiffness_matrix([3,4,5],[3,4,5])
+        # print(pd.DataFrame(Kku))
+        # print("theother")
         # # Kkk = self.sub_stiffness_matrix([3,4,5],[0, 1, 2])
 
         # # Kuk = self.sub_stiffness_matrix([0,1,2],[0,1,2])
         # # Kuu = self.sub_stiffness_matrix([0,1,2],[3,4,5])
-        Fk = self.loads[known_forces_indeces]
+
+        Fk = self.assemble_forces(known_forces_indeces)
+        print(Fk, "Fk")
         # Fk = np.array([0, -2000, 0])
-        Uk = np.array([0, 0, 0])
+        Uk = self.assemble_displacements(known_displacement_indeces)
 
         Uu = scipy.linalg.solve(Kku,Fk - Kkk.dot(Uk))
         Fu = Kuk.dot(Uk) + Kuu.dot(Uu)

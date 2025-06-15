@@ -101,7 +101,7 @@ class B2D2(FEMElement):
         K[np.ix_([1,5,7,11],[1,5,7,11])] = K_bending_axis_2
         K[np.ix_([2,4,8,10],[2,4,8,10])] = K_bending_axis_3
         K[np.ix_([3,9],[3,9])] = K_torsion
-
+        
 
         return K
 
