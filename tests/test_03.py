@@ -51,12 +51,14 @@ if __name__ == "__main__":
      
 
      M = model.LinearElastic(
-          active_axis=(True, True, False),
+          active_dofs=(True, True, False, False, False, True),
           elements=[Cantilever],
           restrains=[Restrain],
           loads=[Force]
      )
 
-     print(pd.Series(M.solve()[1]))
+     print(pd.Series(M.solve()))
      print(pd.DataFrame(Cantilever.stiffness_matrix))
      print(materials.Concrete(28).elastic_modulus)
+
+     print(pd.DataFrame(Cantilever.alt_stiffness_matrix))

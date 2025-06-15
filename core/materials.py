@@ -14,11 +14,14 @@ class LinearElastic(ABC):
 @dataclass
 class Concrete(LinearElastic): 
      compression_strength: float 
+     poison_ration: float = 0.20
      
      def __post_init__(self) -> None: 
           self.elastic_modulus: float = 15100*self.compression_strength**0.5
           self.beta_1: float = self.get_beta_1()
           self.tension_strength: float = 0.56 * math.sqrt(self.compression_strength)
+
+          self.shear_modulus: float = self.elastic_modulus/(2*(1-self.poison_ration))
 
      def get_beta_1(self) -> float: 
           if self.compression_strength <= 28: 
