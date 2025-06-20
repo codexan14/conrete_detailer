@@ -37,12 +37,12 @@ if __name__ == "__main__":
           ReinforcedSection=RCB120X250
      )
 
-     Force = forces.PunctualForceOnBeams(
-          load_case="DEAD",
-          magnitud=-2000, 
-          axis=(3, 'local'),
-          position=1,
-          elements=[Cantilever]
+     Force = forces.PunctualForceBeam(
+          load_case="DEAD", 
+          magnitud= -2000,
+          local_axis = 2,
+          element = Cantilever,
+          relative_position = 1 #position from node 1 in local axis 1
      )
 
      Restrain = restrain.FixedSupport(
@@ -60,5 +60,4 @@ if __name__ == "__main__":
      print(pd.Series(M.solve()))
      print(pd.DataFrame(Cantilever.stiffness_matrix))
      print(materials.Concrete(28).elastic_modulus)
-
      print(pd.DataFrame(Cantilever.alt_stiffness_matrix))
