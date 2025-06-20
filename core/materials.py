@@ -42,8 +42,10 @@ class Steel(LinearElastic):
           self.elastic_modulus: float = 200000 #MPa 
           self.yield_strain: float = self.tension_strength / self.elastic_modulus 
 
-     def stress(self, strain: float): 
-          if strain <= -self.yield_strain:
+     def stress(self, strain: float) -> float: 
+          stress: float
+
+          if strain <= -self.yield_strain: 
                stress = -self.tension_strength
           elif strain <= self.yield_strain: 
                stress = self.elastic_modulus * strain 
