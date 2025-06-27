@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
 import math 
 from abc import ABC, abstractmethod
+import numpy as np 
+from numpy.typing import NDArray
+from typing import Literal, Union
 
 @dataclass
 class LinearElastic(ABC):
@@ -42,16 +45,25 @@ class Steel(LinearElastic):
           self.elastic_modulus: float = 200000 #MPa 
           self.yield_strain: float = self.tension_strength / self.elastic_modulus 
 
-     def stress(self, strain: float) -> float: 
-          stress: float
+     def stress(self, strain: float | NDArray[np.float64]) -> Union[float, NDArray[np.float64]]: 
+          stress: Union[float, NDArray[np.float64]]
 
-          if strain <= -self.yield_strain: 
-               stress = -self.tension_strength
-          elif strain <= self.yield_strain: 
-               stress = self.elastic_modulus * strain 
-          else: 
-               stress = self.tension_strength
+          if type(strain) == float : 
+               if strain <= -self.yield_strain: 
+                    stress = -self.tension_strength
+               elif strain <= self.yield_strain: 
+                    stress = self.elastic_modulus * strain 
+               else: 
+                    stress = self.tension_strength
           
+          elif type(strain) == np.ndarray: 
+               stress = strain * self.elastic_modulus
+               stress[strain <= -self.yield_strain] = -self.tension_strength
+               stress[strain >= self.yield_strain] = self.tension_strength
+
+          else: 
+               stress = 0
+
           return stress 
      
      def strain(self, stress: float) -> float: 
