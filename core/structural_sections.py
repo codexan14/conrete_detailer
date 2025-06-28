@@ -159,7 +159,6 @@ class RectangularColumnSection(StructuralSection):
 
 
 
-
 def iterate(function, function_goal, initial_value = 0,method = 'biseccion', error = 0.1, max_iteration = 100): 
      yo = function(initial_value)
      xo = initial_value 
