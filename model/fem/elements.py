@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 import scipy as scipy
 import numpy as np
-import core.structural_sections as structural_sections
+import model.structural_sections as structural_sections
 import math as math 
 from numpy.typing import NDArray
 from typing import Literal, ClassVar

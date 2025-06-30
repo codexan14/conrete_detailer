@@ -1,8 +1,8 @@
 # BEAM IN FEM, ANALYSIS
 import core.fem.elements as elements 
-import core.geometry as geometry
-import core.structural_sections as structural_section
-import core.materials as materials
+import model.geometry as geometry
+import model.structural_sections as structural_section
+import model.materials as materials
 import core.fem.elements as elements
 import pandas as pd 
 

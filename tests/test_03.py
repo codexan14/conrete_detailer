@@ -1,8 +1,8 @@
 # Solve the cantilever beam. With DEAD Load and Live laod. 
 import core.fem.elements as elements 
-import core.structural_sections as structural_sections
-import core.materials as materials 
-import core.geometry as geometry
+import model.structural_sections as structural_sections
+import model.materials as materials 
+import model.geometry as geometry
 import core.fem.elements as elements
 import pandas as pd 
 import core.fem.forces as forces

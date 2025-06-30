@@ -1,10 +1,10 @@
-from core.materials import Concrete, Steel
-from core.geometry import Section, RectangularSection
+from model.materials import Concrete, Steel
+from model.geometry import Section, RectangularSection
 from abc import ABC, abstractmethod
 from typing import Literal, Self
 from dataclasses import dataclass, field
 import math
-import core.analysis as analysis
+import model.analysis as analysis
 import numpy as np 
 from time import sleep 
 @dataclass

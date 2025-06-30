@@ -1,0 +1,4 @@
+-e ./core
+streamlit
+fastapi
+numpy

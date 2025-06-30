@@ -1,6 +1,6 @@
-import core.materials as materials
-import core.structural_sections as structural_sections
-import core.geometry as geometry
+import model.materials as materials
+import model.structural_sections as structural_sections
+import model.geometry as geometry
 
 if __name__ == "__main__": 
      Concrete_28 = materials.Concrete(
