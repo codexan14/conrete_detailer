@@ -1,45 +1,21 @@
 import numpy as np
-import matplotlib.pyplot as plt 
 import numpy as np 
 from typing import Callable
 from numpy.typing import NDArray
-from matplotlib.figure import Figure
-from scipy.optimize import minimize
-import math
-
-def numeric_solver(function: Callable[[float], float], goal: float, x1: float, x2: float, error: float): 
-    y1: float = function(x1) - goal
-    y2: float = function(x2) - goal
-
-    # x3 = (x1 + x2)/2
-    x3 = x1 - y1 * (x2-x1) / (y2-y1)
-    y3 = function(x3) - goal
-
-    iter = 0
-    print(x1, x2, x3, y1, y2, y3, abs(function(x3) - goal))
-    while ((abs(function(x3) - goal) >= error) and (iter < 100)):
-        print(x1, x2, x3, y1, y2, y3, abs(function(x3) - goal))
-        # print()
-        if np.sign(y3) == np.sign(y2): 
-            x1, x2, y1, y2 = x1, x3, y1, y3 
-
-        else: 
-            x1, x2, y1, y2 = x3, x2, y3, y2 
-
-        # x3 = (x1 + x2)/2 
-        x3 = x1 - y1 * (x2-x1) / (y2-y1)
-        y3 = function(x3) - goal 
-
-        iter += 1
-
-    return x3
-    
+from core.utils import numeric_solver, numeric_integration
+import matplotlib.pyplot as plt
 
 def beta_1(fc: float) -> float: 
     return min(0.85, max(0.65, 0.85 - 0.05*(fc - 28)/7)) 
 
-def concrete_force(fc: float, c: float, b: float) -> float: 
+def get_concrete_ultimate_force(fc: float, c: float, b: float) -> float: 
     return 0.85*fc*beta_1(fc)*c*b 
+
+def get_concrete_force(fc: float, curvature: float, c: float, b: float) -> float: 
+    stress: Callable[[float], float] = lambda x: curvature*x
+    force: float = numeric_integration(stress, 0, c)
+    return force
+
 
 def steel_stress(steel_strain: float, fy: float, Es: float = 200000) -> float:
     return min(fy, max(-fy, steel_strain * Es)) 
@@ -48,7 +24,7 @@ def steel_stresses(steel_strains: list[float], fy: float, Es: float = 200000) ->
     return [steel_stress(strain, fy, Es) for strain in steel_strains]
 
 def steel_force(rebar_areas: list[float], steel_stresses: list[float], fy: float, Es: float = 200000) -> float: 
-    steel_forces = [area * stress for area,stress in zip(rebar_areas, steel_stresses)]
+    steel_forces: list[float] = [area * stress for area,stress in zip(rebar_areas, steel_stresses)]
     return sum(steel_forces)
 
 
@@ -60,22 +36,40 @@ def get_neutral_axis(
         fy: float, 
         Es: float, 
         force: float,
-        curvature: float): 
+        curvature: float) -> float: 
     """
-    Gets the value of the moment given the curvature and force
-    eded
+    Gets the value of the neutral axis given hte curvature and force
     """
     s_strains: Callable[[float], list[float]] = lambda c: [(c - position)*curvature for position in rebar_positions]
 
     s_stresses: Callable[[float], list[float]] = lambda c: steel_stresses(s_strains(c), fy, Es)
 
-    force_function: Callable[[float], float] = lambda c: concrete_force(fc, c, b) + steel_force(rebar_areas, s_stresses(c), fy)
-    force_goal = force 
+    force_function: Callable[[float], float] = lambda c: get_concrete_ultimate_force(fc, c, b) + steel_force(rebar_areas, s_stresses(c), fy)
+    force_goal: float = force 
 
     nutral_axis: float = numeric_solver(force_function, force_goal, 0, max(rebar_positions), 1e-10)
     
-    return nutral_axis
+    return nutral_axis 
 
+def get_moment_curvature(
+        b: float, 
+        rebar_areas: list[float], 
+        rebar_positions: list[float], 
+        fc: float, 
+        fy: float, 
+        Es: float,
+        final_curvature: float = 0.001, 
+        n: int = 10) -> tuple[list[float], list[float]]:
+    
+    curvatures: list[float] = ((np.logspace(start=0, stop=1, num=n, base=10)-1)/9*final_curvature).tolist()
+    neutral_axes: list[float] = []
+
+    for curvature in curvatures: 
+        neutral_axis: float = get_neutral_axis(b, rebar_areas, rebar_positions, fc, fy, Es, force = 0, curvature=curvature)
+        
+        neutral_axes.append(neutral_axis)
+
+    return curvatures, neutral_axes
 
 def get_phi_nominal_force_and_moment(
         b: float, 
@@ -96,7 +90,7 @@ def get_phi_nominal_force_and_moment(
     a: NDArray[np.float64] = np.clip(0.85*c, 0, h)
 
     # Calculation of the Force due to the deformation of the Concrete
-    concrete_force = 0.85*fc*a*b 
+    get_concrete_ultimate_force = 0.85*fc*a*b 
 
     # Calculation of the Force due to the deformation of the Steel
     steel_strains: NDArray[np.float64] = theta*(c - rebar_positions)
@@ -105,9 +99,9 @@ def get_phi_nominal_force_and_moment(
 
     phi = np.clip(0.65 + (0.90-0.65)/(0.005-0.0021)*(-steel_strains[-1]-0.0021), 0.65, 0.90)
 
-    nominal_force = float(concrete_force + np.sum(steel_forces))
+    nominal_force = float(get_concrete_ultimate_force + np.sum(steel_forces))
 
-    nominal_moment = float(concrete_force*(h/2 - a/2) + np.sum(steel_forces*(h/2 - rebar_positions)))
+    nominal_moment = float(get_concrete_ultimate_force*(h/2 - a/2) + np.sum(steel_forces*(h/2 - rebar_positions)))
     # print(F,M)
 
     return phi, nominal_force, nominal_moment
@@ -175,4 +169,8 @@ def interaction_diagram(
 
 if __name__ == "__main__":
     result = get_neutral_axis(400, [507*2 + 126*2, 126*2, 126*2, 507*2+126*2], [80, 225, 375, 520], 28, 420, 200000, 10000, 0.001/600)
-    get_moment_curvature()
+    k, M = get_moment_curvature(400, [507, 126, 126, 507], [80, 225, 375, 520], 28, 420, 200000, 0.0002, 10)
+    k1, M1 = get_moment_curvature(400, [507, 126, 126, 507], [80, 225, 375, 520], 28, 420, 200000, 0.0002, 20)
+    plt.plot(k, M, "o-")
+    plt.plot(k1, M1, "o-")
+    plt.show()
