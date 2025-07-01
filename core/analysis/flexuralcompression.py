@@ -27,7 +27,6 @@ def steel_force(rebar_areas: list[float], steel_stresses: list[float], fy: float
     steel_forces: list[float] = [area * stress for area,stress in zip(rebar_areas, steel_stresses)]
     return sum(steel_forces)
 
-
 def get_neutral_axis(
         b: float, 
         rebar_areas: list[float], 
@@ -105,7 +104,6 @@ def get_phi_nominal_force_and_moment(
     # print(F,M)
 
     return phi, nominal_force, nominal_moment
-
 
 def interaction_diagram(
         b: float, 
