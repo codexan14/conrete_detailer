@@ -38,3 +38,6 @@ dist/
 =======
 *.egg-info/
 >>>>>>> 7c22ff0 (Modified the license)
+
+# Node modules
+svelte_app/svelte_app/node_modules/
