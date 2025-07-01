@@ -1,5 +1,6 @@
 import numpy as np 
 from typing import Callable, Literal
+import math 
 
 def numeric_integration(function: Callable[[float],float], x0: float, xf: float, n: int = 10) -> float | Literal[0]: 
     integral = 0 
@@ -34,3 +35,7 @@ def numeric_solver(function: Callable[[float], float], goal: float, x1: float, x
         iter += 1
 
     return x3
+
+
+def bar_area(diameter: float) -> float: 
+    return 1/4 * math.pi * diameter**2
