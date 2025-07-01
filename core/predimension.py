@@ -40,10 +40,10 @@ def get_two_direction_slab_width(horizontal_length: float, vertical_length: floa
 
     return width 
 
-def get_slab_direction(length: float, width: float): 
+def get_slab_direction(horizontal_length: float, vertical_length: float, ): 
     pass 
 
-def get_slab_width():
+def get_slab_width() -> None:
     return 
 
 def get_equivalent_waffle_width(slab_height: float, beam_base: float, separation: float) -> float: 

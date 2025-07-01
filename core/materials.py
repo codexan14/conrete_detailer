@@ -12,7 +12,6 @@ def get_stress_linear_plastic(strain: float, elastic_modulus: float, max_stress:
     stress: float = get_stress_linear_elastic(strain, elastic_modulus)
     return max(-max_stress, min(stress, max_stress))
 
-
 ## CONCRETE MATERIAL 
 def get_concrete_elastic_modulus(fc: float) -> float: 
     return 4700 * (fc)**0.5
@@ -35,6 +34,6 @@ def get_concrete_stress(strain: float, fc: float, method: Literal["Linear", "Hog
         
     return stress
 
-## STEEL MATERIAL
+## STEEL MATERIAL FUNCTIONS
 def get_steel_elastic_modulus(fy: float) -> float: 
     return 200000
