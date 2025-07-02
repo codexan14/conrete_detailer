@@ -39,3 +39,4 @@ def numeric_solver(function: Callable[[float], float], goal: float, x1: float, x
 
 def bar_area(diameter: float) -> float: 
     return 1/4 * math.pi * diameter**2
+
