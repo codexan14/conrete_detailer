@@ -42,3 +42,6 @@ dist/
 # Node modules
 svelte_app/svelte_app/node_modules/
 node_modules
+
+svelte_app/
+api/ 
