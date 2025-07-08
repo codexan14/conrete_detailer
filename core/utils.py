@@ -21,7 +21,6 @@ def numeric_solver(function: Callable[[float], float], goal: float, x1: float, x
     iter = 0
 
     while ((abs(function(x3) - goal) >= error) and (iter < 100)):
-
         if np.sign(y3) == np.sign(y2): 
             x1, x2, y1, y2 = x1, x3, y1, y3 
 
