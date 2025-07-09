@@ -21,8 +21,7 @@ def steel_weight(As: float, L: float) -> float:
 class Rebar: 
     diameter: float 
     length: float 
+    first_anchor_type: str 
+    last_anchor_type: str 
 
-    def area(self) -> float: 
-        return 1/4 * math.pi * (self.diameter)**2
     
-    def cos
