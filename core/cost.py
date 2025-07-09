@@ -1,27 +1,50 @@
-from dataclasses import dataclass
-import math 
+from dataclasses import dataclass, field
+from typing import Self
 
-STEEL_DENSITY = 7850 / (1000)**3        #KG/MM3
-CONCRETE_DENSITY = 2800 / (1000)**3     #KG/MM3
-
-STEEL_PRICE = 1200 / (1000)             #USD/KG
-CONCRETE_PRICE = 120 / (1000)**3        #USD/MM3
-
-def concrete_volume(b: float, h: float, L: float) -> float: 
-    return b * h * L 
-
-def steel_volume(As: float, L: float) -> float: 
-    return As * L 
-
-def steel_weight(As: float, L: float) -> float: 
-    return STEEL_DENSITY * steel_volume(As, L)
-
+CONCRETE_PRICE = 100 #USD/M3
 
 @dataclass
-class Rebar: 
-    diameter: float 
-    length: float 
-    first_anchor_type: str 
-    last_anchor_type: str 
+class Container: 
+    name: str = field(init=False)
+    unit_price: float = field(init=False)
+    quantity: float = field(init=False)
+    unit: str = field(init=False)
+    sub_containers: list[Self] =field(init=False)
 
+    def get_total_cost(self) -> float:# -> Any: 
+        cost: float = 0 
+        for sub_container in self.sub_containers: 
+            cost += sub_container.quantity * sub_container.unit_price
+        
+        return cost 
     
+@dataclass 
+class Concrete(Container):
+    quantity: float
+
+    def __post_init__(self) -> None: 
+        self.name: str = "CONCRETE"
+        self.unit: str = "m3"
+        self.unit_price: float = CONCRETE_PRICE
+
+@dataclass
+class Steel(Container): 
+    quantity: float
+
+    def __post_init__(self) -> None: 
+        self.name: str = "CONCRETE"
+        self.unit: str = "m3"
+        self.unit_price: float = CONCRETE_PRICE
+
+@dataclass
+class Beam(Container):
+    width: float 
+    height: float
+    length: float
+
+    def __post_init__(self) -> None: 
+        self.sub_containers: list[Container] = []
+        self.sub_containers.append(
+            Concrete(quantity=self.width * self.height * self.length),
+            Steel()
+        )
