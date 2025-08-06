@@ -1,41 +1,20 @@
+import csv 
+from typing import cast, Iterator
 import numpy as np 
-from typing import Callable, Literal
-import math 
 
-def numeric_integration(function: Callable[[float],float], x0: float, xf: float, n: int = 10) -> float | Literal[0]: 
-    integral = 0 
-    for x in np.linspace(start=x0, stop=xf, num = n, endpoint=True): 
-        integral += function(x) * (xf-x0)/n
-
-    return integral
-
-
-def numeric_solver(function: Callable[[float], float], goal: float, x1: float, x2: float, error: float) -> float: 
-    y1: float = function(x1) - goal
-    y2: float = function(x2) - goal
-
-    # x3 = (x1 + x2)/2  
-    x3: float = x1 - y1 * (x2-x1) / (y2-y1)
-    y3: float = function(x3) - goal
-
-    iter = 0
-
-    while ((abs(function(x3) - goal) >= error) and (iter < 100)):
-        if np.sign(y3) == np.sign(y2): 
-            x1, x2, y1, y2 = x1, x3, y1, y3 
-
-        else: 
-            x1, x2, y1, y2 = x3, x2, y3, y2 
-
-        # x3 = (x1 + x2)/2 
-        x3 = x1 - y1 * (x2-x1) / (y2-y1)
-        y3 = function(x3) - goal 
-
-        iter += 1
-
-    return x3
+def extract_column_from_csv(path: str, column_name: str) -> list[str]: 
+    with open(file=path, mode='r') as file: 
+        data_iterator: Iterator[list[str]] = cast(Iterator[list[str]], csv.reader(file, delimiter=','))
+        header: list[str] = [text.replace(" ","") for text in next(data_iterator)]
+        column_index: int = header.index(column_name)
+        desired_column: list[str] = [row[column_index].replace(" ","") for row in data_iterator]
+    
+    return desired_column
 
 
-def bar_area(diameter: float) -> float: 
-    return 1/4 * math.pi * diameter**2
+if __name__ == '__main__':
+    print(extract_column_from_csv(path = "core/examples/01/beam_sections.csv", column_name="height"))
 
+    a = extract_column_from_csv(path = "core/examples/01/beam_sections.csv", column_name="base")
+    b = np.array(a, dtype=np.float64) *2 
+    print(b)

@@ -1,0 +1,3 @@
+section_name, base,height, steel_area_top, steel_area_bottom, steel_area_skin, outter_stirrup_area, inner_stirrups_area, cover
+B300X600, 300, 600, 5070, 10140, 0, 140, 0, 40
+B400X700, 400, 700, 5070, 10140, 0, 140, 0, 40
