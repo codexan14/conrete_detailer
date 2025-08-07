@@ -2,10 +2,17 @@ import csv
 from typing import cast, Iterator
 import numpy as np 
 
+def extract_headers_from_csv(path: str) -> list[str]: 
+    with open(file=path, mode='r') as file: 
+        data_iterator: Iterator[list[str]] = cast(Iterator[list[str]], csv.reader(file, delimiter=','))
+        header: list[str] = [text for text in next(data_iterator)]
+
+    return header 
+
 def extract_column_from_csv(path: str, column_name: str) -> list[str]: 
     with open(file=path, mode='r') as file: 
         data_iterator: Iterator[list[str]] = cast(Iterator[list[str]], csv.reader(file, delimiter=','))
-        header: list[str] = [text.replace(" ","") for text in next(data_iterator)]
+        header: list[str] = [text for text in next(data_iterator)]
         column_index: int = header.index(column_name)
         desired_column: list[str] = [row[column_index].replace(" ","") for row in data_iterator]
     

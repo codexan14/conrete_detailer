@@ -1,0 +1,5 @@
+"section_name","base","height","concrete_strength","rebar_area_top","rebar_area_bottom","rebar_position_top","rebar_position_bottom","steel_area_skin","outter_stirrup_area","inner_stirrups_area","cover"
+"B300X600","300","600","28","507","1014","70","530","0","140","0","40"
+"B400X700","400","700","28","507","1014","70","630","0","140","0","40"
+"B500X800","500","800","28","507","1014","70","730","0","140","0","40"
+"B500X900","500","900","28","507","1014","70","830","0","140","0","40"
