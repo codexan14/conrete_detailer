@@ -32,7 +32,7 @@ if __name__ == '__main__':
     feet_entry.grid(column=2, row=1, sticky=(W, E))
 
     meters = StringVar()
-    ttk.Label(mainframe, width=7, textvariable=meters)
+    ttk.Label(mainframe, width=7, textvariable=meters).grid(column=2, row=2, sticky=(W, E))
 
 
     ttk.Button(mainframe, text="Calculate", command=calculate).grid(column=3, row=3, sticky=W)
