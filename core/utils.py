@@ -18,7 +18,12 @@ def extract_column_from_csv(path: str, column_name: str) -> list[str]:
     
     return desired_column
 
-def solve(function: Callable[[float], float], target: float, initial_value_1: float, initial_value_2: float, error: float = 0.10) -> float:
+def solve(
+        function: Callable[[float], float], 
+        target: float, 
+        initial_value_1: float, 
+        initial_value_2: float, 
+        error: float) -> float:
     """
     Uses the numerical method called bisection method. Where two initial values x1 and x2 are given
     and the function should return values y1 and y2 with different signs
@@ -35,8 +40,10 @@ def solve(function: Callable[[float], float], target: float, initial_value_1: fl
     # First approximation of the solution
     x: float = x1 + (target - y1)*(x2-x1)/(y2-y1)
     
+    iteration_limit = 1000
+    iteration_counter = 0
 
-    while abs(function(x) - target) > error: # Iterates until the function is near the target within an error. 
+    while (iteration_counter < iteration_limit) and (abs(function(x) - target) > error): # Iterates until the function is near the target within an error. 
         y: float = function(x)
         if int(y1/abs(y1)) == int(y/abs(y)): # signs are equal
             x1 = x
@@ -46,6 +53,7 @@ def solve(function: Callable[[float], float], target: float, initial_value_1: fl
             y2 = y
 
         x: float = x1 + (target - y1)*(x2-x1)/(y2-y1)
+        iteration_counter += 1
 
     return x
 

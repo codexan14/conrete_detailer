@@ -1,5 +1,7 @@
 from typing import Callable
-from core.utils import solve 
+from core.utils import solve
+
+
 
 def get_beta_1(concrete_compression_strength: float) -> float: 
     # ACI 318: β_1 varies with f'c between 0.65 and 0.85
@@ -66,13 +68,13 @@ def get_maximum_tensile_reinforcement(
 
     return bottom_rebar_area
 
-def calculate_beam_positive_moment_capacity(
+def calculate_moment_capacity(
         web_width: float, 
         height: float, 
         concrete_compression_strength: float,
         compression_reinforcement_area: float, 
-        rebar_area_bottom: float, 
         compression_reinforcement_centroid: float, 
+        tension_reinforcement_area: float, 
         tension_reinforcement_centroid: float,
         steel_strain_max: float = 0.0021) -> float: 
     
@@ -82,91 +84,80 @@ def calculate_beam_positive_moment_capacity(
         web_width=web_width, 
         neutral_axis_distance=c)
     
-    top_steel_strain: Callable[[float],float] = lambda c: get_strain_at_position_given_neural_axis(
+    compression_reinforcement_strain: Callable[[float],float] = lambda c: get_strain_at_position_given_neural_axis(
         position = compression_reinforcement_centroid, 
         neutral_axis_distance = c, 
         tension_reinforcement_centroid = tension_reinforcement_centroid, 
         steel_strain_max = steel_strain_max)
     
     # See the get_reinforcement_strength function: As*fs
-    top_steel_force: Callable[[float], float] = lambda c: get_reinforcement_strength(
+    compression_reinforcement_strength: Callable[[float], float] = lambda c: get_reinforcement_strength(
         steel_area=compression_reinforcement_area, 
-        steel_strain=top_steel_strain(c))
+        steel_strain=compression_reinforcement_strain(c))
 
     # Bottom Steel is assumed to yield
-    bottom_steel_strain: float = -0.0021
+    tension_reinforcement_strain: float = -0.0021
 
     # See the get_reinforcement_strength function: As*fs
     bottom_steel_force: Callable[[float], float] = lambda c: get_reinforcement_strength(
-        steel_area=rebar_area_bottom, 
-        steel_strain=bottom_steel_strain)
+        steel_area=tension_reinforcement_area, 
+        steel_strain=tension_reinforcement_strain)
 
     # Equilibrium of forces, in terms of c, with lambda functions. Cc + Cs - Ts = 0
-    equilibrium: Callable[[float], float] = lambda c: concrete_force(c) + top_steel_force(c) + bottom_steel_force(c)
+    equilibrium: Callable[[float], float] = lambda c: concrete_force(c) + compression_reinforcement_strength(c) + bottom_steel_force(c)
 
     # Neutral axis is found by minimizing the function f=Cc+Cs-Ts up to zero. 
-    neutral_axis: float = solve(equilibrium, 20, 0, height/2, 0.00001)
+    neutral_axis: float = solve(equilibrium, 20, 0, height/2, 0.001)
     
     beta_1: float = get_beta_1(concrete_compression_strength=concrete_compression_strength)
     
     moment_capacity: float = (
         concrete_force(neutral_axis)*(tension_reinforcement_centroid - beta_1*neutral_axis/2) + 
-        top_steel_force(neutral_axis)*(tension_reinforcement_centroid - compression_reinforcement_centroid))
+        compression_reinforcement_strength(neutral_axis)*(tension_reinforcement_centroid - compression_reinforcement_centroid))
     
     return moment_capacity
 
-def calculate_beam_negative_moment_capacity(
-        web_width: float, 
+def calculate_positive_moment_capacity(web_width: float, 
         height: float, 
         concrete_compression_strength: float,
-        compression_reinforcement_area: float, 
-        rebar_area_bottom: float, 
-        compression_reinforcement_centroid: float, 
-        tension_reinforcement_centroid: float,
-        steel_strain_max: float = 0.0021) -> float: 
+        top_reinforcement_area: float, 
+        top_reinforcement_centroid: float, 
+        bottom_reinforcement_area: float, 
+        bottom_reinforcement_centroid: float,
+        steel_strain_max: float) -> float: 
     
-    # See the get_concrete_section_strength function: 0.85*fc*a*b
-    concrete_force: Callable[[float], float] = lambda c: get_concrete_section_strength(
-        concrete_compression_strength=concrete_compression_strength, 
-        web_width=web_width, 
-        neutral_axis_distance=c)
+    return calculate_moment_capacity(web_width=web_width, 
+        height=height, 
+        concrete_compression_strength=concrete_compression_strength,
+        compression_reinforcement_area=top_reinforcement_area, 
+        compression_reinforcement_centroid=top_reinforcement_centroid, 
+        tension_reinforcement_area=bottom_reinforcement_area, 
+        tension_reinforcement_centroid=bottom_reinforcement_centroid,
+        steel_strain_max=steel_strain_max
+    )
+
+def calculate_negative_moment_capacity(web_width: float, 
+        height: float, 
+        concrete_compression_strength: float,
+        top_reinforcement_area: float, 
+        top_reinforcement_centroid: float, 
+        bottom_reinforcement_area: float, 
+        bottom_reinforcement_centroid: float,
+        steel_strain_max: float) -> float: 
     
-    top_steel_strain: float = -0.0021
-
-    # See the get_reinforcement_strength function: As*fs
-    top_steel_force: Callable[[float], float] = lambda c: get_reinforcement_strength(
-        steel_area=compression_reinforcement_area, 
-        steel_strain=top_steel_strain)
-
-    # Bottom Steel is assumed to yield
-    bottom_steel_strain: Callable[[float], float] = lambda c: get_strain_at_position_given_neural_axis(
-        position = height - tension_reinforcement_centroid, 
-        neutral_axis_distance = c, 
-        tension_reinforcement_centroid = height - compression_reinforcement_centroid, 
-        steel_strain_max = steel_strain_max)
-
-    # See the get_reinforcement_strength function: As*fs
-    bottom_steel_force: Callable[[float], float] = lambda c: get_reinforcement_strength(
-        steel_area=rebar_area_bottom, 
-        steel_strain=bottom_steel_strain(c))
-
-    # Equilibrium of forces, in terms of c, with lambda functions. Cc + Cs - Ts = 0
-    equilibrium: Callable[[float], float] = lambda c: concrete_force(c) + top_steel_force(c) + bottom_steel_force(c)
-
-    # Neutral axis is found by minimizing the function f=Cc+Cs-Ts up to zero. 
-    neutral_axis: float = solve(equilibrium, 20, 0, height/2, 0.00001)
-
-    beta_1: float = get_beta_1(concrete_compression_strength=concrete_compression_strength)
-    
-    moment_capacity: float = (
-        concrete_force(neutral_axis)*(tension_reinforcement_centroid - beta_1*neutral_axis/2) + 
-        bottom_steel_force(neutral_axis)*(tension_reinforcement_centroid - compression_reinforcement_centroid))
-    
-    return moment_capacity
+    return calculate_moment_capacity(web_width=web_width, 
+        height=height, 
+        concrete_compression_strength=concrete_compression_strength,
+        compression_reinforcement_area=bottom_reinforcement_area, 
+        compression_reinforcement_centroid=height-bottom_reinforcement_centroid, 
+        tension_reinforcement_area=top_reinforcement_area, 
+        tension_reinforcement_centroid=height-top_reinforcement_centroid,
+        steel_strain_max=steel_strain_max
+    )
 
 if __name__ == '__main__':
 
-    from utils import evaluate
+    from core.utils import evaluate
 
     evaluate(function=get_beta_1, eval_value=28, expected_return_value=0.85, error=0.01)
 
@@ -217,20 +208,22 @@ if __name__ == '__main__':
         longitudinal_reinforcement_yield_stress=420
     ), eval_value=0, expected_return_value=4_505, name='get_maximum_tensile_reinforcement')
 
-    evaluate(lambda rebar_area_bottom: calculate_beam_positive_moment_capacity(
+    evaluate(lambda bottom_reinforcement_area: calculate_positive_moment_capacity(
         web_width=300, 
         height=600, 
         concrete_compression_strength=28, 
-        compression_reinforcement_area = 2*507, 
-        rebar_area_bottom=rebar_area_bottom, 
-        compression_reinforcement_centroid=70, 
-        tension_reinforcement_centroid=530), eval_value=5*507, expected_return_value=492230374.53596, name='calculate_beam_positive_positive_capacity')
+        top_reinforcement_area = 2*507, 
+        top_reinforcement_centroid=70,
+        bottom_reinforcement_area=bottom_reinforcement_area, 
+        bottom_reinforcement_centroid=530,
+        steel_strain_max=0.0021), eval_value=5*507, expected_return_value=492230374.53596, name='calculate_beam_positive_positive_capacity')
     
-    evaluate(lambda rebar_area_bottom: calculate_beam_negative_moment_capacity(
+    evaluate(lambda bottom_reinforcement_area: calculate_negative_moment_capacity(
         web_width=300, 
         height=600, 
         concrete_compression_strength=28, 
-        compression_reinforcement_area = 2*507, 
-        rebar_area_bottom=rebar_area_bottom, 
-        compression_reinforcement_centroid=70, 
-        tension_reinforcement_centroid=530), eval_value=5*507, expected_return_value=213012147.62379, name='calculate_beam_positive_negative_capacity')
+        top_reinforcement_area = 2*507, 
+        top_reinforcement_centroid=70,
+        bottom_reinforcement_area=bottom_reinforcement_area, 
+        bottom_reinforcement_centroid=530,
+        steel_strain_max=0.0021), eval_value=5*507, expected_return_value=213012147.62379, name='calculate_beam_positive_negative_capacity')
