@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk, filedialog
 import tkinter.font as tkFont
-from core.beam_lrfd import *
+from core.beam_flexion_lrfd import *
 
 root = Tk() 
 root.geometry("400x400")

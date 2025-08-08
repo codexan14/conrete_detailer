@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk, filedialog
 import tkinter.font as tkFont
-from core.beam_lrfd import *
+from core.beam_flexion_lrfd import *
 from typing import cast
 from dataclasses import dataclass 
 from pathlib import Path

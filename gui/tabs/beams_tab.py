@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from core.utils import extract_column_from_csv
-from core.beam_lrfd import calculate_beam_positive_moment_capacity, calculate_beam_negative_moment_capacity
+from core.beam_flexion_lrfd import calculate_beam_positive_moment_capacity, calculate_beam_negative_moment_capacity
 import csv 
 from typing import Iterator, cast
 import pandas as pd 
