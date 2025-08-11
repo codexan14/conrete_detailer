@@ -37,6 +37,6 @@ Below is a list of the projects currently hosted in this repository. Click on th
 
 *(Add more projects as you create them, following the same format)*
 
-## Getting Started
+## Build the project: 
 
-To explore any of the projects in this repository, you can clone the entire repository to your local machine:
+pyinstaller --noconsole --onefile gui/main.py --add-data "gui/img;gui/img" --add-data "core;core" --add-data "gui/tabs;gui/tabs" --hidden-import numpy --hidden-import pandas --hidden-import tkinter.filedialog --hidden-import PIL --hidden-import PIL.ImageFile  
