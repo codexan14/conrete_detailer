@@ -1,6 +1,10 @@
 
-def shear_reduction_factor() -> float: 
-    return 0.60
+def get_shear_reduction_factor(is_earthquake_design: bool) -> float: 
+    if is_earthquake_design:
+        phi: float = 0.60 
+    else: 
+        phi: float = 0.75
+    return phi
 
 def get_minimum_shear_reinforcement_area(
         web_width: float, 
@@ -20,7 +24,7 @@ def get_nominal_concrete_section_shear_strength(
         shear_reinforcement_spacing: float,
         concrete_compression_strength: float, 
         shear_reinforcement_yield_stress: float, 
-        axial_load: float) -> float: 
+        ultimate_axial_load: float) -> float: 
 
     minimum_shear_reinforcement_area: float = get_minimum_shear_reinforcement_area(
         web_width=web_width, 
@@ -33,7 +37,7 @@ def get_nominal_concrete_section_shear_strength(
     if shear_reinforcement_area > minimum_shear_reinforcement_area: 
         concrete_section_shear_strength: float = (
             0.17 * (concrete_compression_strength)**0.5 + 
-            axial_load / (6 * gross_area)
+            ultimate_axial_load / (6 * gross_area)
         ) * web_width * tension_reinforcement_centroid
 
     else: 
@@ -42,7 +46,7 @@ def get_nominal_concrete_section_shear_strength(
         rho_w: float = tension_reinforcement_area / (web_width * tension_reinforcement_centroid)
 
         concrete_section_shear_strength: float = (
-            0.66 * Lambda_s * Lambda * (rho_w)**(1/3) * (concrete_compression_strength)**0.5 + axial_load/(6*gross_area)
+            0.66 * Lambda_s * Lambda * (rho_w)**(1/3) * (concrete_compression_strength)**0.5 + ultimate_axial_load/(6*gross_area)
         ) * web_width * tension_reinforcement_centroid
 
     concrete_section_shear_strength_limit: float = 0.42 * Lambda * (concrete_compression_strength) ** 0.5 * web_width * tension_reinforcement_centroid
@@ -72,9 +76,11 @@ def ultimate_shear_force_limit(
         shear_reinforcement_spacing: float, 
         concrete_compression_strength: float,
         shear_reinforcement_yield_stress: float,
-        axial_load: float)-> float:   
+        ultimate_axial_load: float,
+        is_earthquake_design: bool)-> float:   
     
-    phi: float = shear_reduction_factor() 
+    phi: float = get_shear_reduction_factor(is_earthquake_design)
+
     Vc: float = get_nominal_concrete_section_shear_strength(
         web_width=web_width, 
         gross_area=gross_area, 
@@ -84,7 +90,7 @@ def ultimate_shear_force_limit(
         shear_reinforcement_spacing=shear_reinforcement_spacing, 
         concrete_compression_strength=concrete_compression_strength, 
         shear_reinforcement_yield_stress=shear_reinforcement_yield_stress, 
-        axial_load=axial_load)
+        ultimate_axial_load=ultimate_axial_load)
 
     # ACI 318-19: 22.5.1.2
     return phi*(Vc + 0.66 * concrete_compression_strength**0.5 * web_width * tension_reinforcement_centroid)
@@ -98,7 +104,7 @@ def get_nominal_section_shear_strength(
         shear_reinforcement_spacing: float,
         concrete_compression_strength: float, 
         shear_reinforcement_yield_stress: float,
-        axial_load: float) -> float: 
+        ultimate_axial_load: float) -> float: 
     
     nominal_concrete_section_shear_strength: float = get_nominal_concrete_section_shear_strength(
         web_width=web_width, 
@@ -109,7 +115,7 @@ def get_nominal_section_shear_strength(
         shear_reinforcement_spacing=shear_reinforcement_spacing, 
         concrete_compression_strength=concrete_compression_strength, 
         shear_reinforcement_yield_stress=shear_reinforcement_yield_stress, 
-        axial_load=axial_load)
+        ultimate_axial_load=ultimate_axial_load)
     
     nominal_shear_reinforcement_strength: float = get_nominal_shear_reinforcement_strength(
         shear_reinforcement_area=shear_reinforcement_area,
