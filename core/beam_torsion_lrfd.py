@@ -56,7 +56,7 @@ def get_cracking_torsion(
 
     return cracking_torsion
 
-def get_torsional_strength_by_stirrups(
+def get_nominal_torsion_strength_by_stirrups(
         enclosed_area_by_outter_stirrup: float, # area enclosed by centerline of the outermost closed transverse torsional reinforcement, mm2
         outter_stirrup_leg_area: float, 
         shear_reinforcement_yield_stress: float, 
@@ -69,7 +69,7 @@ def get_torsional_strength_by_stirrups(
     
     return torsional_Stregnth_by_stirrups
 
-def get_torsional_strength_by_longitudinal_reinforcement(
+def get_nominal_torsion_strength_by_longitudinal_reinforcement(
         enclosed_area_by_outter_stirrup: float, # area enclosed by centerline of the outermost closed transverse torsional reinforcement, mm2
         longitudinal_reinforcement_area: float,
         longitudinal_reinforcement_yield_stress: float, 
@@ -82,7 +82,7 @@ def get_torsional_strength_by_longitudinal_reinforcement(
     
     return torsional_Stregnth_by_stirrups
 
-def get_torsional_strength(
+def get_nominal_torsion_strength(
         enclosed_area_by_outter_stirrup: float, # area enclosed by centerline of the outermost closed transverse torsional reinforcement, mm2
         longitudinal_reinforcement_area: float,
         outter_stirrup_leg_area: float, 
@@ -93,12 +93,12 @@ def get_torsional_strength(
         ) -> float: 
     
     return min(
-        get_torsional_strength_by_stirrups(
+        get_nominal_torsion_strength_by_stirrups(
             enclosed_area_by_outter_stirrup=enclosed_area_by_outter_stirrup, # area enclosed by centerline of the outermost closed transverse torsional reinforcement, mm2
             outter_stirrup_leg_area=outter_stirrup_leg_area, 
             shear_reinforcement_yield_stress=shear_reinforcement_yield_stress, 
             stirrup_separation=stirrup_separation),
-        get_torsional_strength_by_longitudinal_reinforcement(
+        get_nominal_torsion_strength_by_longitudinal_reinforcement(
             enclosed_area_by_outter_stirrup=enclosed_area_by_outter_stirrup, # area enclosed by centerline of the outermost closed transverse torsional reinforcement, mm2
             longitudinal_reinforcement_area=longitudinal_reinforcement_area,
             longitudinal_reinforcement_yield_stress=longitudinal_reinforcement_yield_stress, 

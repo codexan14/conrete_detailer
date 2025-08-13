@@ -66,7 +66,7 @@ def get_maximum_tensile_reinforcement(
 
     return bottom_rebar_area
 
-def calculate_moment_capacity(
+def get_beam_nominal_moment(
         web_width: float, 
         height: float, 
         concrete_compression_strength: float,
@@ -115,7 +115,7 @@ def calculate_moment_capacity(
     
     return moment_capacity
 
-def calculate_positive_moment_capacity(web_width: float, 
+def get_beam_positive_nominal_moment(web_width: float, 
         height: float, 
         concrete_compression_strength: float,
         top_reinforcement_area: float, 
@@ -124,7 +124,7 @@ def calculate_positive_moment_capacity(web_width: float,
         bottom_reinforcement_centroid: float,
         steel_strain_max: float) -> float: 
     
-    return calculate_moment_capacity(web_width=web_width, 
+    return get_beam_nominal_moment(web_width=web_width, 
         height=height, 
         concrete_compression_strength=concrete_compression_strength,
         compression_reinforcement_area=top_reinforcement_area, 
@@ -134,7 +134,7 @@ def calculate_positive_moment_capacity(web_width: float,
         steel_strain_max=steel_strain_max
     )
 
-def calculate_negative_moment_capacity(web_width: float, 
+def get_beam_negative_nominal_moment(web_width: float, 
         height: float, 
         concrete_compression_strength: float,
         top_reinforcement_area: float, 
@@ -143,7 +143,7 @@ def calculate_negative_moment_capacity(web_width: float,
         bottom_reinforcement_centroid: float,
         steel_strain_max: float) -> float: 
     
-    return calculate_moment_capacity(web_width=web_width, 
+    return get_beam_nominal_moment(web_width=web_width, 
         height=height, 
         concrete_compression_strength=concrete_compression_strength,
         compression_reinforcement_area=bottom_reinforcement_area, 
@@ -206,7 +206,7 @@ if __name__ == '__main__':
         longitudinal_reinforcement_yield_stress=420
     ), eval_value=0, expected_return_value=4_505, name='get_maximum_tensile_reinforcement')
 
-    evaluate(lambda bottom_reinforcement_area: calculate_positive_moment_capacity(
+    evaluate(lambda bottom_reinforcement_area: get_beam_positive_nominal_moment(
         web_width=300, 
         height=600, 
         concrete_compression_strength=28, 
@@ -216,7 +216,7 @@ if __name__ == '__main__':
         bottom_reinforcement_centroid=530,
         steel_strain_max=0.0021), eval_value=5*507, expected_return_value=492230374.53596, name='calculate_beam_positive_positive_capacity')
     
-    evaluate(lambda bottom_reinforcement_area: calculate_negative_moment_capacity(
+    evaluate(lambda bottom_reinforcement_area: get_beam_negative_nominal_moment(
         web_width=300, 
         height=600, 
         concrete_compression_strength=28, 
