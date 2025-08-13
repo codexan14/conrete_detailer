@@ -16,7 +16,7 @@ def get_bending_torsion_interaction(
         stirrup_separation: float,
         outter_stirrup_leg_area: float, 
         outter_stirrup_perimeter: float,
-        steel_strain_max: float
+        steel_strain_max: float 
 ) -> None: 
 
     longitudinal_reinforcement_area: float = (
