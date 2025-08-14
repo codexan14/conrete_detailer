@@ -1,17 +1,9 @@
 from typing import Callable
 from core.utils import solve
 
-def get_beta_1(concrete_compression_strength: float) -> float: 
-    # ACI 318: β_1 varies with f'c between 0.65 and 0.85
-    return min(0.85, max(0.65, 0.85 - 0.0020*(concrete_compression_strength - 30)))
+from core.concrete_lrfd import get_beta_1, get_concrete_section_strength
 
-def get_concrete_section_strength(
-        concrete_compression_strength: float, 
-        web_width: float, 
-        neutral_axis_distance: float) -> float: 
-    
-    # Concrete force = 0.85*fc*a*b = 0.85*fc*β_1*c*b
-    return 0.85*concrete_compression_strength*get_beta_1(concrete_compression_strength=concrete_compression_strength)*neutral_axis_distance*web_width
+
 
 def get_strain_at_position_given_neural_axis(
         position: float, 
@@ -78,8 +70,9 @@ def get_beam_nominal_moment(
     
     # See the get_concrete_section_strength function: 0.85*fc*a*b
     concrete_force: Callable[[float], float] = lambda c: get_concrete_section_strength(
-        concrete_compression_strength=concrete_compression_strength, 
         web_width=web_width, 
+        height=height, 
+        concrete_compression_strength=concrete_compression_strength, 
         neutral_axis_distance=c)
     
     compression_reinforcement_strain: Callable[[float],float] = lambda c: get_strain_at_position_given_neural_axis(
@@ -160,7 +153,7 @@ if __name__ == '__main__':
     evaluate(function=get_beta_1, eval_value=28, expected_return_value=0.85, error=0.01)
 
     evaluate(
-        lambda c: get_concrete_section_strength(concrete_compression_strength=28, web_width=300, neutral_axis_distance=c), 
+        lambda c: get_concrete_section_strength(height=600, web_width=300, concrete_compression_strength=28, neutral_axis_distance=c), 
         eval_value=150, expected_return_value=910_350, 
         name = 'get_concrete_section_strength', 
         error=0.01)
