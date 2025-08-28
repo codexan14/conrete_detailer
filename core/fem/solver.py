@@ -3,11 +3,59 @@ import numpy as np
 from core.fem.truss_2D import get_truss_stiffness
 import pandas as pd 
 
-def truss_2D_model(connection: list[tuple[tuple[float,float], tuple[float,float]]]) -> None: 
+def truss_2D_model(
+        nodes: list[tuple[float,float]], 
+        connection: list[tuple[tuple[float,float], tuple[float,float]]],
+        areas: list[float], 
+        young_moduli: list[float],
+        global_force_matrix: list[tuple[float, float]],
+        global_displacement_matrix: list[tuple[float, float]],
+        restrained_dof: list[tuple[bool, bool]]
+        ) -> tuple[NDArray[np.float64], NDArray[np.float64]]: 
     
+    number_of_dof: int = 2 * len(nodes)
+    
+    specified_displacement_dofs: list[bool] = np.array(restrained_dof).ravel().tolist()
+    unknown_displacement_dofs: list[bool] = [not restrain for restrain in specified_displacement_dofs]
 
+    # Transforms the global displacement matrix into a row
+    global_displacements: NDArray[np.float64] = np.array(global_displacement_matrix, dtype=np.float64).ravel()
+    global_forces: NDArray[np.float64] = np.array(global_force_matrix, dtype=np.float64).ravel()
+    
+    K: NDArray[np.float64] = np.zeros([number_of_dof, number_of_dof])
+    for pair_nodes, area, young_modulus in zip(connection,areas,young_moduli):
+        kl: NDArray[np.float64]
+        te: NDArray[np.float64]
+        kg: NDArray[np.float64]
+        kl, te, kg = get_truss_stiffness(nodes=pair_nodes, area=area, young_modulus=young_modulus, poison_ratio=0.25)
+    
+        dof: list[int] = [2*nodes.index(node) + i for node in pair_nodes for i in range(2)]
+
+        K[np.ix_(dof, dof)] += kg
+    
+    Kuu: NDArray[np.float64] = K[np.ix_(unknown_displacement_dofs, unknown_displacement_dofs)]
+    Kus: NDArray[np.float64] = K[np.ix_(unknown_displacement_dofs, specified_displacement_dofs)]
+    Ksu: NDArray[np.float64] = K[np.ix_(specified_displacement_dofs, unknown_displacement_dofs)]
+    Kss: NDArray[np.float64] = K[np.ix_(specified_displacement_dofs, specified_displacement_dofs)]
+
+    Pu: NDArray[np.float64] = global_forces[unknown_displacement_dofs]
+    du: NDArray[np.float64] = global_displacements[unknown_displacement_dofs]
+    ds: NDArray[np.float64] = global_displacements[specified_displacement_dofs]
+
+    du = np.linalg.inv(Kuu).dot(Pu - Kus.dot(ds))
+    # print(du)
+    global_displacements[unknown_displacement_dofs] = du 
+    
+    Rs: NDArray[np.float64] = Ksu.dot(du) + Kss.dot(ds)
+    
+    global_forces[specified_displacement_dofs] = Rs
+
+    return global_forces, global_displacements
+
+def beam_2D_model(connection: list[tuple[tuple[float, float], tuple[float,float]]]) -> None: 
+    pass 
+    
 if __name__ == "__main__": 
-
     nodes: list[tuple[float, float]] = [
         (0, 0), 
         (4000, 0), 
@@ -16,14 +64,11 @@ if __name__ == "__main__":
     ]
 
     force_vector = np.array([0, 0, 0, 0, 0, -9000, 0, 0])
-    restrains: list[bool] = [True, True, False, False, False, False, True, True]
-    displacements: NDArray[np.float64] = np.array([-4, 0, 0, 0, 0, 0, 0, 0], dtype=np.float64)
-    unknown_displacement_dofs: list[bool] = [not restrain for restrain in restrains]
-    specified_displacement_dofs: list[bool] = restrains
+    global_force_matrix: list[tuple[float,float]] = [
+        (0,0), (0,0), (0,-9000), (0,0)
+    ]
 
-    areas: list[float] = [100, 200, 100, 200, 100]
-
-
+    global_displacement_matrix: list[tuple[float, float]] = [(-4,0), (0,0), (0,0), (0,0)]
     connection = [
         (nodes[0], nodes[1]),
         (nodes[0], nodes[2]),
@@ -31,6 +76,30 @@ if __name__ == "__main__":
         (nodes[1], nodes[3]),
         (nodes[2], nodes[3]),
         ]
+    
+    restrains: list[bool] = [True, True, False, False, False, False, True, True]
+    restrained_dof: list[tuple[bool, bool]] = [(True, True), (False, False), (False, False), (True, True)]
+
+    
+    result = truss_2D_model(
+        nodes=nodes, 
+        connection=connection,
+        areas=[100, 200, 100, 200, 100],
+        young_moduli=[200_000, 200_000, 200_000, 200_000, 200_000],
+        global_force_matrix=global_force_matrix,
+        global_displacement_matrix=global_displacement_matrix,
+        restrained_dof=restrained_dof
+        )
+    
+    print(result)
+    
+    displacements: NDArray[np.float64] = np.array([-4, 0, 0, 0, 0, 0, 0, 0], dtype=np.float64)
+    unknown_displacement_dofs: list[bool] = [not restrain for restrain in restrains]
+    specified_displacement_dofs: list[bool] = restrains
+
+    areas: list[float] = [100, 200, 100, 200, 100]
+
+    
 
     K: NDArray[np.float64] = np.zeros([len(restrains), len(restrains)])
     for pair_nodes, area in zip(connection,areas):
@@ -61,4 +130,4 @@ if __name__ == "__main__":
     Rs: NDArray[np.float64] = Ksu.dot(du) + Kss.dot(ds)
     
     force_vector[specified_displacement_dofs] = Rs
-    print(pd.DataFrame(force_vector))
+    print(pd.DataFrame(force_vector), "\n",pd.DataFrame(displacements))
