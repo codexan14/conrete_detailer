@@ -1,53 +1,39 @@
-from core.cost import *
+def slab_concrete_volume(lx: float, ly: float, slab_height: float) -> float: 
+    concrete_volume: float = lx * ly * slab_height
 
-if __name__ == "__main__":
-    B300X600_1 = Beam(
-        width=300,
-        height=600,
-        length=1000, 
-        concrete_resistance=28,
-        TopRebar=LongitudinalRebar(
-            diameter=25, 
-            quantity=5, 
-            length=2,
-            start_hook_degree=90,
-            end_hook_degree=0
-        ),
-        BotttomRebar=LongitudinalRebar(
-            diameter=25, 
-            quantity=5, 
-            length=2,
-            start_hook_degree=90,
-            end_hook_degree=0
-        ),
-        SkinRebar=LongitudinalRebar(
-            diameter=25, 
-            quantity=5, 
-            length=2,
-            start_hook_degree=90,
-            end_hook_degree=0
-        ),
-        AdditionalTopRebarStart=LongitudinalRebar(
-            diameter=25, 
-            quantity=5, 
-            length=2,
-            start_hook_degree=90,
-            end_hook_degree=0
-        ),
-        AdditionalTopRebarEnd=LongitudinalRebar(
-            diameter=25, 
-            quantity=5, 
-            length=2,
-            start_hook_degree=90,
-            end_hook_degree=0
-        ),
-        AdditionalTBottomRebar=LongitudinalRebar(
-            diameter=25, 
-            quantity=5, 
-            length=2,
-            start_hook_degree=90,
-            end_hook_degree=0
-        )
-    )
+    return concrete_volume
 
-    print(B300X600_1._Concrete)
+def waffle_slab_concrete_volume(beam_width: float, foam_width: float, topping: float, lx: float, ly: float, slab_height: float) -> float: 
+    number_of_foam_blocks_x = int(2 * (lx - 2*slab_height + beam_width)/(foam_width + beam_width)) / 2
+    number_of_foam_blocks_y = int(2 * (ly - 2*slab_height + beam_width)/(foam_width + beam_width)) / 2
+    foam_volume = (number_of_foam_blocks_x * foam_width) * (number_of_foam_blocks_y * foam_width) * (slab_height - topping)
+    concrete_volume = lx * ly * slab_height - foam_volume
+
+    return concrete_volume
+
+def beam_concrete_volume(width: float, height: float, length: float): 
+    concrete_volume: float = width * height * length
+
+    return concrete_volume
+
+def column_concrete_volume(width: float, height: float, length: float):
+    concrete_volume: float = width * height * length
+
+    return concrete_volume
+
+#################
+def beam_steel_weight(rebar: dict[float, float], length):
+    for diameter in rebar: 
+        rebar[diameter] /4 * pi * diameter**2 * length
+
+
+def column_steel_weight(steel_area, height):
+    return steel_area * height
+
+
+
+
+
+
+
+######## VIGAS 
