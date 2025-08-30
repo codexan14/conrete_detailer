@@ -1,6 +1,6 @@
 from numpy.typing import NDArray 
 import numpy as np 
-from core.fem.truss_2D import get_truss_stiffness
+from core.fem.bar import get_2D_truss_global_stiffness, get_2D_truss_local_to_global_transformation_matrix, get_truss_local_stiffness, get_node_rotation_matrix
 import pandas as pd 
 
 def truss_2D_model(
@@ -24,10 +24,12 @@ def truss_2D_model(
     
     K: NDArray[np.float64] = np.zeros([number_of_dof, number_of_dof])
     for pair_nodes, area, young_modulus in zip(connection,areas,young_moduli):
-        kl: NDArray[np.float64]
-        te: NDArray[np.float64]
-        kg: NDArray[np.float64]
-        kl, te, kg = get_truss_stiffness(nodes=pair_nodes, area=area, young_modulus=young_modulus, poison_ratio=0.25)
+        direction_vector = np.array(pair_nodes[1]) - np.array(pair_nodes[0])
+        length: float = float(np.linalg.norm(direction_vector))
+        kl: NDArray[np.float64] = get_truss_local_stiffness(length=length, area=area, young_modulus=young_modulus)
+        rotation_matrix: NDArray[np.float64] = get_node_rotation_matrix(direction_vector=direction_vector)
+        te: NDArray[np.float64] = get_2D_truss_local_to_global_transformation_matrix(rotation_matrix=rotation_matrix)
+        kg: NDArray[np.float64] = get_2D_truss_global_stiffness(local_stiffness_matrix=kl, transformation_matrix=te)
     
         dof: list[int] = [2*nodes.index(node) + i for node in pair_nodes for i in range(2)]
 

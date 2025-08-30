@@ -54,7 +54,7 @@ def get_beam_local_stiffness(length: float, inertia: float, young_modulus: float
         [   +12,           +6 *length,     -12,            +6**length      ],
         [   +6**length,    +4**length**2,  -6**length,     +2**length**2   ],
         [   -12,           -6 *length,     +12,            -6**length      ],
-        [   +6**length,    +2**length**2,  -6**length,     -4**length**2   ]
+        [   +6**length,    +2**length**2,  -6**length,     +4**length**2   ]
     ], dtype=np.float64)
 
 def get_2D_frame_local_stiffness(length: float, area: float, inertia: float, young_modulus: float) -> NDArray[np.float64]: 
@@ -73,7 +73,8 @@ def get_3D_frame_local_stiffness(
     stiffness: NDArray[np.float64] = np.zeros([12, 12])
     stiffness[np.ix_([0, 6], [0, 6])] = get_truss_local_stiffness(length=length, area=area, young_modulus=young_modulus)
     stiffness[np.ix_([1, 5, 7, 11], [1, 5, 7, 11])] = get_beam_local_stiffness(length=length, inertia=inertia_z, young_modulus=young_modulus)
-    rotation_matrix: NDArray[np.float64] = np.array([[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 0, 1], [0, 0, -1, 0]])
+
+    rotation_matrix: NDArray[np.float64] = np.array([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, -1]])
     stiffness[np.ix_([2, 4, 8, 10], [2, 4, 8, 10])] = ((rotation_matrix.transpose()).dot(get_beam_local_stiffness(length=length, inertia=inertia_y, young_modulus=young_modulus))).dot(rotation_matrix)
     stiffness[np.ix_([3, 9], [3, 9])] = get_beam_torsion_stiffness(length=length, polar_inertia=inertia_z + inertia_y, shear_modulus=shear_modulus)
     return stiffness

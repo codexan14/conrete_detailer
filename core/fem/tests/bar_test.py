@@ -31,9 +31,21 @@ def test_get_rotation_matrix() -> bool:
     # value.dot(test.transpose()) and compare the trace to 6
     return (test - 6)/6 < 1e-10
 
+def test_get_2D_frame_local_stiffness() -> bool: 
+    value = get_2D_frame_local_stiffness(length=1, area=2, inertia=3, young_modulus=10)
+    print(value.trace())
+    goal = 1000
+
+    return value.trace() == goal
+
+def test_get_3D_frame_local_stiffness() -> bool: 
+    value = get_3D_frame_local_stiffness(length=1, area=2, inertia_z=3, inertia_y=4, young_modulus=10, shear_modulus=20)
+    goal = 2560
+
+
+    return value.trace() == goal
 if __name__ == "__main__":
     assert test_get_node_rotation_matrix()
     assert test_get_rotation_matrix()
-    print(get_2D_frame_local_stiffness(1, 1, 1, 200_000))
-    print(pd.DataFrame(get_3D_frame_local_stiffness(length=1, area=2, inertia_z=3, inertia_y=4, young_modulus=10, shear_modulus=20)))
-    
+    assert test_get_2D_frame_local_stiffness()
+    assert test_get_3D_frame_local_stiffness()
