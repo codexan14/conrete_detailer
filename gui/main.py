@@ -14,23 +14,25 @@ def beam_app():
     root.geometry("400x400")
     root.title("Beam Designer")
 
-    notebook = ttk.Notebook(root)
+    notebook = ttk.Notebook(master=root)
     notebook.grid(column=0, row=0, padx=25, pady=25)
+
+    
+
+    # Settings tab
+    tab_01_container = SettingModule()
+    notebook.add(child=tab_01_container.settings_tab, text="Settings")
+
+    # Beams Tab
+    tab_02_container = BeamModule(path_to_folder=tab_01_container.path_to_folder)
+    notebook.add(child=tab_02_container.beams_tab, text="Beams")
 
     #Buy me a coffee!
     # DONATION_URL = ""
 
     # Donation tab
-    tab_0_container = DonationModule()
-    notebook.add(tab_0_container.donation_tab, text="Donation!")
-
-    # Settings tab
-    tab_1_container = SettingModule()
-    notebook.add(tab_1_container.settings_tab, text="Settings")
-
-    # Beams Tab
-    tab_2_container = BeamModule(path_to_folder=tab_1_container.path_to_folder)
-    notebook.add(tab_2_container.beams_tab, text="Beams")
+    tab_99_container = DonationModule()
+    notebook.add(child=tab_99_container.donation_tab, text="Donation!")
 
     return root
 

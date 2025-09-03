@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-import core.beam_flexion_lrfd
 import pandas as pd 
+import core.beam_flexion_lrfd 
 
 class BeamModule:
     def __init__(self, path_to_folder: tk.StringVar) -> None: 
