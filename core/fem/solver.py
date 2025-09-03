@@ -12,7 +12,7 @@ def truss_2D_model(
         global_displacement_matrix: list[tuple[float, float]],
         restrained_dof: list[tuple[bool, bool]]
         ) -> tuple[NDArray[np.float64], NDArray[np.float64]]: 
-    
+    """Returns the vector of global forces and global displacements"""
     number_of_dof: int = 2 * len(nodes)
     
     specified_displacement_dofs: list[bool] = np.array(restrained_dof).ravel().tolist()
