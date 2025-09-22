@@ -3,8 +3,6 @@ from core.utils import solve
 
 from core.concrete_lrfd import get_beta_1, get_concrete_section_strength
 
-
-
 def get_strain_at_position_given_neural_axis(
         position: float, 
         neutral_axis_distance: float, 
